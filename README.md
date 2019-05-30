@@ -8,10 +8,6 @@ This app uses Handlebars https://handlebarsjs.com/ as the UI Templating Engine
 
 A Twilio Account with access to the Twilio Console (functionality in the app will assume you are logged in and can link to the console)
 
-```
-Give examples
-```
-
 ### Installing
 
 Step 1: Clone or download this repository to a location of your preference on your local machine
