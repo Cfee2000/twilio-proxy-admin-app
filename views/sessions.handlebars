@@ -1,0 +1,84 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="/services">Services</a></li>
+    <li class="breadcrumb-item active">Sessions</li>
+  </ol>
+</nav>
+<h3>Sessions</h3>
+<div id="sessionrows">
+    <ul class="list-group">
+        {{#each sessions}}
+        <li class="list-group-item">
+            <a href="/participants?sessionSid={{this.sid}}&serviceSid={{serviceSid}}">{{this.uniqueName}}</a>
+            <button data-sessionSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" id="delSession{{@index}}" class="btn btn-danger float-right">Delete</button>
+        </li>
+        {{/each}}
+    </ul>
+</div>
+<br>
+<div class="cr-session">
+    <!-- Button HTML (to Trigger Modal) -->
+    <a href="#modalSession" role="button" class="btn btn-lg btn-primary" data-toggle="modal">Quick Create</a>
+
+    <!-- Modal HTML -->
+    <div id="modalSession" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Session</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <span class="mr-2">Name:</span><input id="uniqueName" type="text"></input>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button data-serviceSid="{{serviceSid}}" id="createSession" type="button" class="btn btn-primary">Submit</button>
+                </div>
+                <div id="modal-error" class="mx-4 alert alert-danger" role="alert" style="display:none">
+                    <span id="errorMsg"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let i = 0;
+    let id = `delSession${i}`;
+    while(document.getElementById(id) !== null)
+    {
+        let element = document.getElementById(id);
+        element.addEventListener('click', () => {
+            $.ajax({
+                url: `/sessionDelete?serviceSid=${element.attributes["data-serviceSid"].value}&sessionSid=${element.attributes["data-sessionSid"].value}`,
+                type: 'POST',
+            }).done((data) => {
+                location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
+                //setTimeout(location.reload.bind(location), 8000);
+            }).fail((xhr, status, error) => {
+                $('#modal-error').show();
+                $('#errorMsg').text(xhr.responseText);
+        });
+        });
+        i++;
+        id = `delSession${i}`;
+    }
+
+    let element2 = document.getElementById('createSession');
+    let uniqueName = document.getElementById('uniqueName');
+    element2.addEventListener('click', () => {
+        //Need to update this to be a POST and to use AXIOS
+        $.ajax({
+            url: `/createSession?serviceSid=${element2.attributes["data-serviceSid"].value}&uniqueName=${uniqueName.value}`,
+            type: 'POST',
+        }).done((data) => {
+            location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
+            //setTimeout(location.reload.bind(location), 8000);
+        }).fail((xhr, status, error) => {
+            $('#modal-error').show();
+            $('#errorMsg').text(xhr.responseText);
+        });
+    });
+</script>

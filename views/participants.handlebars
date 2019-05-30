@@ -1,0 +1,112 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="/services">Services</a></li>
+    <li class="breadcrumb-item"><a href="/sessions?sid={{serviceSid}}">Sessions</a></li>
+    <li class="breadcrumb-item active">Participants</li>
+  </ol>
+</nav>
+<h3>Participants</h3>
+<ul class="list-group">
+    {{#each participants}}
+    <li class="list-group-item">
+        
+        <span><a href="/interactions?sessionSid={{sessionSid}}&serviceSid={{serviceSid}}&participantName={{this.friendlyName}}&participantSid={{this.sid}}&participantPhone={{this.identifier}}&participantProxyNum={{this.proxyIdentifier}}">{{this.friendlyName}}</a>  ({{this.sid}})</span><br>
+        <span class="ml ml-2">Real # ({{this.identifier}})</span>
+        <span class="ml ml-2">Proxy # ({{this.proxyIdentifier}})</span>
+
+        <button data-participantSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" data-sessionSid="{{sessionSid}}" id="del{{@index}}" class="btn btn-danger float-right">Delete</button>
+        <button class="btn btn-success float-right mr mr-4">Dial</button>
+    </li>
+    {{/each}}
+</ul>
+<br>
+<form id="participantForm">
+    <!-- Button HTML (to Trigger Modal) -->
+    <a href="#modalParticipant" role="button" class="btn btn-lg btn-primary" data-toggle="modal">Quick Create</a>
+
+    <!-- Modal HTML -->
+    <div id="modalParticipant" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Participant</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <span class="mr-2">Participant Name:</span><input class="form-control" id="friendlyName" type="text" required></input>
+                    <span class="mr-2">Participant Phone:</span><input class="form-control" id="identifier"  type="tel" pattern="^\+?[1-9]\d{1,14}$" required></input>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button data-serviceSid="{{serviceSid}}" data-sessionSid="{{sessionSid}}" id="createParticipant" type="button" class="btn btn-primary">Submit</button>
+                </div>
+                <div id="modal-error" class="mx-4 alert alert-danger" role="alert" style="display:none">
+                    <span id="errorMsg"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<br>
+<br>
+<h3>Available Phone Numbers</h3>
+<ul class="list-group">
+    {{#each phoneNumbers}}
+    <li class="list-group-item">
+        {{this.phoneNumber}}
+    </li>
+    {{/each}}
+</ul>
+<br>
+<a target="_blank" class="btn btn-lg btn-primary" href="https://www.twilio.com/console/proxy/services/{{serviceSid}}/proxy_numbers" role="button">Add Phone Numbers</a></button>
+
+<script>
+    let i = 0;
+    let id = `del${i}`;
+    while(document.getElementById(id) !== null)
+    {
+        let element = document.getElementById(id);
+        element.addEventListener('click', () => {
+            $.ajax({
+                url: `/participantDelete?serviceSid=${element.attributes["data-serviceSid"].value}&sessionSid=${element.attributes["data-sessionSid"].value}&participantSid=${element.attributes["data-participantSid"].value}`,
+                type: 'POST',
+            }).done((data) => {
+                location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
+                //setTimeout(location.reload.bind(location), 8000);
+            }).fail((xhr, status, error) => {
+                $('#modal-error').show();
+                $('#errorMsg').text(xhr.responseText);
+            });
+            //Need to update this to be a POST and to use AXIOS
+            //$.getJSON(`/participantDelete?serviceSid=${element.attributes["data-serviceSid"].value}&sessionSid=${element.attributes["data-sessionSid"].value}&participantSid=${element.attributes["data-participantSid"].value}`);
+            //setTimeout(location.reload.bind(location), 1000); //For production code, I would not reload the page, but rather just create a DIV container and refresh that
+            //Need this to be part of a callback, otherwise it won't always work because it will be called before the previous code is finished
+        });
+        i++;
+        id = `del${i}`;
+    }
+
+    let element2 = document.getElementById('createParticipant');
+    let friendlyName = document.getElementById('friendlyName');
+    let identifier = document.getElementById('identifier');
+    element2.addEventListener('click', () => {
+        let validity = $('#participantForm').valid();
+        $.ajax({
+            url: `/createParticipant?serviceSid=${element2.attributes["data-serviceSid"].value}&sessionSid=${element2.attributes["data-sessionSid"].value}&friendlyName=${friendlyName.value}&identifier=${identifier.value}`,
+            type: 'POST',
+        }).done((data) => {
+            location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
+            //setTimeout(location.reload.bind(location), 8000);
+        }).fail((xhr, status, error) => {
+            $('#modal-error').show();
+            $('#errorMsg').text(xhr.responseText);
+        });
+        //Need to update this to be a POST and to use AXIOS
+        //$.getJSON(`/createParticipant?serviceSid=${element2.attributes["data-serviceSid"].value}&sessionSid=${element2.attributes["data-sessionSid"].value}&friendlyName=${friendlyName.value}&identifier=${identifier.value}`);
+        //setTimeout(location.reload.bind(location), 1000); //For production code, I would not reload the page, but rather just create a DIV container and refresh that
+            //Need this to be part of a callback, otherwise it won't always work because it will be called before the previous code is finished
+    });
+</script>
+
+

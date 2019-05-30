@@ -1,0 +1,46 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="/services">Services</a></li>
+    <li class="breadcrumb-item"><a href="/sessions?sid={{serviceSid}}">Sessions</a></li>
+    <li class="breadcrumb-item"><a href="/participants?sessionSid={{sessionSid}}&serviceSid={{serviceSid}}">Participants</a></li>
+    <li class="breadcrumb-item active">{{selectedParticipant}}'s Interactions</li>
+  </ol>
+</nav>
+
+<h3>{{selectedParticipant}}'s Interactions</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Type</th>
+            <th scope="col">Call/SMS From</th>
+            <th scope="col">Call/SMS To</th>
+            <th scope="col">Content</th>
+            <th scope="col">Status</th>
+            <th scope="col">Status Date</th>
+            <th scope="col">Has Recording</th>
+        </tr>
+    </thead>   
+    <tbody> 
+    {{#each interactions}}
+        <tr>
+        {{#if this.Voice}}
+            <td>Voice</td>
+        {{else}}
+            <td>SMS</td>
+        {{/if}}
+            <td>{{this.CallerName}} ({{this.CallerSid}})</td>
+            <td>{{this.RecipientName}} ({{this.RecipientSid}})</td>
+            <td>{{this.Content}}</td>
+            <td>{{this.CallStatus}}</td>
+            <td>{{this.StatusDate}}</td>
+        {{#if this.RecSid.length}}
+            <td><a target="_blank" href="https://www.twilio.com/console/voice/recordings/recording-logs/{{this.RecSid.[0]}}">YES</a></td>
+        {{else}}
+            <td>NO</td>
+        {{/if}}
+        </tr>
+    {{/each}}
+    </tbody>
+</table>
