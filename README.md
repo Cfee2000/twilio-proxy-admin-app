@@ -10,10 +10,10 @@ A Twilio Account with access to the Twilio Console (functionality in the app wil
 
 ### Installing
 
-Step 1: Clone or download this repository to a location of your preference on your local machine
-Step 2: Use the .env.template file as a reference to create a .env file. 
-Step 3: Copy the AccountSID and AuthToken from your Twilio Account (can be found on main dashboard of Twilio Console) and add them to the .env file where specified
-Step 4: Use npm to install the required dependencies...
+```Step 1:``` Clone or download this repository to a location of your preference on your local machine.<br> 
+```Step 2:``` Use the .env.template file as a reference to create a .env file.<br>
+```Step 3:``` Copy the AccountSID and AuthToken from your Twilio Account (can be found on main dashboard of Twilio Console) and add them to the .env file where specified.<br> 
+```Step 4:``` Use npm to install the required dependencies...<br> 
 
 ```
 npm install twilio
@@ -39,8 +39,8 @@ Embedded in this app is also an HTTP GET route "recordCall" for handling recordi
 
 The call recording requires that you add a Callback URL to the Twilio Proxy Service via the Twilio Console here: https://www.twilio.com/console/proxy/services/.
 
-Step 1: Click on your Proxy Service link
-Step 2: Add your callback url in the "Callback URL" optional field. *Note that you need to have an accessible public HTTP/S endpoint running. I suggest you use ngrok at least for development purposes * [ngrok](https://ngrok.com/)
+```Step 1:``` Click on your Proxy Service link<br>
+```Step 2:``` Add your callback url in the "Callback URL" optional field. *Note that you need to have an accessible public HTTP/S endpoint running. I suggest you use ngrok at least for development purposes * [ngrok](https://ngrok.com/)<br>
 
 ```
 Example URL: http://XXXXXX.ngrok.io/recordCall (if you are running ngrok)
