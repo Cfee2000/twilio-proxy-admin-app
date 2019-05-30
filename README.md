@@ -4,11 +4,11 @@ This is a Twilio Proxy Administrative Application that facilitates the ability t
 
 This app uses Handlebars https://handlebarsjs.com/ as the UI Templating Engine
 
-### Prerequisites
+## Prerequisites
 
 A Twilio Account with access to the Twilio Console (functionality in the app will assume you are logged in and can link to the console)
 
-### Installing
+## Installing
 
 ```Step 1:``` Clone or download this repository to a location of your preference on your local machine.<br> 
 ```Step 2:``` Use the .env.template file as a reference to create a .env file.<br>
@@ -61,7 +61,7 @@ Create a configuration for the launcher. It should point to the proxyMgrApp.js f
     ]
 ```
 
-### Running the App
+## Running the App
 
 Use startup scripts in your package.json, or simply type the following in a VSCode terminal window that is at the root of your project...
 
@@ -69,7 +69,7 @@ Use startup scripts in your package.json, or simply type the following in a VSCo
 node proxyMgrApp.js
 ```
 
-### Navigating the App
+## Navigating the App
 
 The links and buttons in the app will self-direct you to where you want to go
 
