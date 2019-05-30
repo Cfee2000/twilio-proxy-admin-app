@@ -25,7 +25,7 @@ npm install axios
 npm install body-parser
 ```
 ```
-npm install body-parser
+npm install express
 ```
 ```
 npm install express-handlebars
