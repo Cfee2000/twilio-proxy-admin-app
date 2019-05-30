@@ -40,11 +40,12 @@ Embedded in this app is also an HTTP GET route "recordCall" for handling recordi
 The call recording requires that you add a Callback URL to the Twilio Proxy Service via the Twilio Console here: https://www.twilio.com/console/proxy/services/.
 
 Step 1: Click on your Proxy Service link
-Step 2: Add your webhook in the "Callback URL" optional field. *Note that you need to have an accessible public HTTP/S endpoint running. I suggest you use ngrok at least for development purposes * [ngrok](https://ngrok.com/)
+Step 2: Add your callback url in the "Callback URL" optional field. *Note that you need to have an accessible public HTTP/S endpoint running. I suggest you use ngrok at least for development purposes * [ngrok](https://ngrok.com/)
 
 ```
 Example URL: http://XXXXXX.ngrok.io/recordCall (if you are running ngrok)
 ```
+The Callback URL will webhook to your server and route to the "recordCall" endpoint, where it calls the "processRecordCall" async function. I use axios to call POST to the recording API *(see [here](https://www.twilio.com/docs/voice/api/recording#create-a-recording-resource) for more info).
 
 ## Debugging
 
