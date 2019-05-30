@@ -45,7 +45,7 @@ The call recording requires that you add a Callback URL to the Twilio Proxy Serv
 ```
 Example URL: http://XXXXXX.ngrok.io/recordCall (if you are running ngrok)
 ```
-The Callback URL will webhook to your server and route to the "recordCall" endpoint, where it calls the "processRecordCall" async function. I use axios to call POST to the recording API *(see [here](https://www.twilio.com/docs/voice/api/recording#create-a-recording-resource) for more info).
+The Callback URL will webhook to your server and route to the "recordCall" endpoint, where it calls the "processRecordCall" async function. The implementation uses axios to POST to the recording API *(see [here](https://www.twilio.com/docs/voice/api/recording#create-a-recording-resource) for more info)*.
 
 ## Debugging
 
@@ -66,7 +66,7 @@ Create a configuration for the launcher. It should point to the proxyMgrApp.js f
 Use startup scripts in your package.json, or simply type the following in a VSCode terminal window that is at the root of your project...
 
 ```
-node index proxyMgrApp.js
+node proxyMgrApp.js
 ```
 
 ### Navigating the App
