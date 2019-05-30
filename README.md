@@ -1,6 +1,6 @@
 # Twilio Proxy Admin App
 
-This is a Twilio Proxy Administrative Application that facilitates the ability to **manage Participants and display Participant Interactions as part of a Proxy Session, as well as link to call recordings tied to a Proxy Interaction** (*Note -- though not supported natively by Proxy, call recording funtionality is embedded in this app by way of the recording api (see ##call-recording-setup))* Currently, the Twilio Console does not have a way to manage participants through the UI. **This app is meant to augment the Twilio Console Proxy UI, not replace it** The app also provides very simple constructs for managing Services, Sessions, and Phone Numbers as well, but not to the depth that is provided in the Twilio Console UI.
+This is a Twilio Proxy Administrative Application that facilitates the ability to **manage Participants and display Participant Interactions as part of a Proxy Session, as well as link to call recordings tied to a Proxy Interaction** (*Note -- though not supported natively by Proxy, call recording funtionality is embedded in this app by way of the recording api (see #call-recording-setup))* Currently, the Twilio Console does not have a way to manage participants through the UI. **This app is meant to augment the Twilio Console Proxy UI, not replace it** The app also provides very simple constructs for managing Services, Sessions, and Phone Numbers as well, but not to the depth that is provided in the Twilio Console UI.
 
 This app uses Handlebars https://handlebarsjs.com/ as the UI Templating Engine
 
