@@ -1,7 +1,7 @@
 # LEGAL DISCLAIMER
-<aside class="warning">
-Notice: This information is not legal advice, and Twilio recommends that you consult with your legal counsel to make sure that you are complying with all applicable laws in connection with calls you transmit and receive using Twilio. Ultimately, you are responsible for ensuring that your use of Twilio complies with all applicable laws and regulations. Please also refer to our [Terms of Service](https://www.twilio.com/legal/tos) and [Acceptable Use Policy](https://www.twilio.com/legal/aup) for more information. Please see here: [Legal Considerations](https://support.twilio.com/hc/en-us/articles/360011522553-Legal-Considerations-with-Recording-Voice-and-Video-Communications) for more on considerations around recording voice communications.
-</aside>
+
+Notice: This information is not legal advice, and Twilio recommends that you consult with your legal counsel to make sure that you are complying with all applicable laws in connection with calls you transmit and receive using Twilio. Ultimately, you are responsible for ensuring that your use of Twilio complies with all applicable laws and regulations. Please also refer to our [**Terms of Service**](https://www.twilio.com/legal/tos>) and [**Acceptable Use Policy**](https://www.twilio.com/legal/aup) for more information. Please see here: [**Legal Considerations**](https://support.twilio.com/hc/en-us/articles/360011522553-Legal-Considerations-with-Recording-Voice-and-Video-Communications) for more on considerations around recording voice communications.
+
 
 # Twilio Proxy Admin App
 
