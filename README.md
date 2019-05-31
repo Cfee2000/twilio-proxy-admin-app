@@ -11,7 +11,9 @@ This app uses Node Express as the backend and uses Handlebars https://handlebars
 
 ## Prerequisites
 
-A Twilio Account with access to the Twilio Console (functionality in the app will assume you are logged in and can link to the console)
+1. A Twilio Account with access to the Twilio Console (functionality in the app will assume you are logged in and can link to the console)
+2. An accessable web server running Node.js (can be your local machine for development)
+3. A publically accessible HTTP/S endpoint (may opt to use [Ngrok](https://ngrok.com/) to facilitate for local development)
 
 ## Installing
 
