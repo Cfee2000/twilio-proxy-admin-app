@@ -78,6 +78,13 @@ node proxyMgrApp.js
 
 The links and buttons in the app will self-direct you to where you want to go
 
+## Creating Services, Sessions, and Participants
+
+The app will facilitate the ability for you to create Services, Sessions, and Participants via modal windows on their respective pages.
+
+#### PII
+Note that when creating a new Participant, the "Friendly Name" you provide in the modal window should not include a participants real name. See https://www.twilio.com/docs/proxy/api/participant#create-a-participant-resource and https://www.twilio.com/docs/glossary/what-is-personally-identifiable-information-pii#pii-fields. 
+
 ## Authors
 
 * **Chris Feehan** - [Twilio]
