@@ -1,5 +1,4 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const axios = require('axios');
 const exphbs = require('express-handlebars');
 
@@ -10,8 +9,6 @@ const client = require('twilio')(accountSid, authToken);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-app.use(bodyParser.urlencoded({ extended: false }));
 
 //Handlebars middleware
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
