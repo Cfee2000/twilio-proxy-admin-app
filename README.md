@@ -41,7 +41,7 @@ The Callback URL will webhook to your server and route to the "recordCall" endpo
 
 ## Running the App
 
-Use startup scripts in your package.json, or simply type the following in a VSCode terminal window that is at the root of your project...
+Use startup scripts in your package.json, or simply type the following in a terminal window that is at the root of your project...
 
 ```
 node proxyMgrApp.js
