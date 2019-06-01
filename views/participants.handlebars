@@ -21,7 +21,7 @@
     {{/each}}
 </ul>
 <br>
-<form id="participantForm">
+
     <!-- Button HTML (to Trigger Modal) -->
     <a href="#modalParticipant" role="button" class="btn btn-lg btn-primary" data-toggle="modal">Quick Create</a>
 
@@ -47,7 +47,6 @@
             </div>
         </div>
     </div>
-</form>
 <br>
 <br>
 <h3>Available Phone Numbers</h3>
@@ -91,7 +90,6 @@
     let friendlyName = document.getElementById('friendlyName');
     let identifier = document.getElementById('identifier');
     element2.addEventListener('click', () => {
-        let validity = $('#participantForm').valid();
         $.ajax({
             url: `/createParticipant?serviceSid=${element2.attributes["data-serviceSid"].value}&sessionSid=${element2.attributes["data-sessionSid"].value}&friendlyName=${friendlyName.value}&identifier=${identifier.value}`,
             type: 'POST',

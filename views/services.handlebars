@@ -43,13 +43,12 @@
 
 <script>
     let i = 0;
-    let id = `delService${i}`;
-    while(document.getElementById(id) !== null)
+    while($(`#delService${i}`).length)
     {
-        let element = document.getElementById(id);
-        element.addEventListener('click', () => {
+        let element = $(`#delService${i}`);
+        element.click(() => {
             $.ajax({
-                url: `/serviceDelete?serviceSid=${element.attributes["data-serviceSid"].value}`,
+                url: `/serviceDelete?serviceSid=${element[0].attributes["data-serviceSid"].value}`,
                 type: 'POST',
             }).done((data) => {
                 location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
@@ -60,15 +59,14 @@
             });
         });
         i++;
-        id = `delService${i}`;
     }
 
-    let element2 = document.getElementById('createService');
-    let uniqueName = document.getElementById('uniqueName');
-    element2.addEventListener('click', () => {
+    let element = $('#createService');
+    let uniqueName = $('#uniqueName');
+    element.click(() => {
         //Need to update this to be a POST and to use AXIOS
         $.ajax({
-            url: `/createService?uniqueName=${uniqueName.value}`,
+            url: `/createService?uniqueName=${uniqueName[0].value}`,
             type: 'POST',
         }).done((data) => {
             location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page

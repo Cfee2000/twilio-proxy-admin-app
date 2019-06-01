@@ -46,13 +46,12 @@
 
 <script>
     let i = 0;
-    let id = `delSession${i}`;
-    while(document.getElementById(id) !== null)
+    while($(`#delSession${i}`).length)
     {
-        let element = document.getElementById(id);
-        element.addEventListener('click', () => {
+        let element = $(`#delSession${i}`);
+        element.click(() => {
             $.ajax({
-                url: `/sessionDelete?serviceSid=${element.attributes["data-serviceSid"].value}&sessionSid=${element.attributes["data-sessionSid"].value}`,
+                url: `/sessionDelete?serviceSid=${element[0].attributes["data-serviceSid"].value}&sessionSid=${element[0].attributes["data-sessionSid"].value}`,
                 type: 'POST',
             }).done((data) => {
                 location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
@@ -60,18 +59,17 @@
             }).fail((xhr, status, error) => {
                 $('#modal-error').show();
                 $('#errorMsg').text(xhr.responseText);
-        });
+            });
         });
         i++;
-        id = `delSession${i}`;
     }
 
-    let element2 = document.getElementById('createSession');
-    let uniqueName = document.getElementById('uniqueName');
-    element2.addEventListener('click', () => {
+    let element = $('#createSession');
+    let uniqueName = $('#uniqueName');
+    element.click(() => {
         //Need to update this to be a POST and to use AXIOS
         $.ajax({
-            url: `/createSession?serviceSid=${element2.attributes["data-serviceSid"].value}&uniqueName=${uniqueName.value}`,
+            url: `/createSession?serviceSid=${element[0].attributes["data-serviceSid"].value}&uniqueName=${uniqueName[0].value}`,
             type: 'POST',
         }).done((data) => {
             location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page

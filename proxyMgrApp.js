@@ -99,9 +99,7 @@ app.post('/sessionDelete', (req, res) => {
 });
 
 app.post('/createParticipant', (req, res) => {
-    res.setHeader('content-type', 'text/javascript');
-    createParticipant(req, res); 
-         
+    createParticipant(req, res);     
 });
 
 async function createParticipant(req, res){
