@@ -1,3 +1,4 @@
+
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="/">Home</a></li>
@@ -9,9 +10,17 @@
 <div id="sessionrows">
     <ul class="list-group">
         {{#each sessions}}
-        <li class="list-group-item">
-            <a href="/participants?sessionSid={{this.sid}}&serviceSid={{serviceSid}}">{{this.uniqueName}}</a>
-            <button data-sessionSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" id="delSession{{@index}}" class="btn btn-danger float-right">Delete</button>
+            {{#ifCond this.status "==" "closed"}}
+            <li class="mb-2 border border-warning rounded list-group-item">
+                <a href="/participants?sessionSid={{this.sid}}&serviceSid={{serviceSid}}">{{this.uniqueName}}</a>
+                <button data-sessionSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" id="delSession{{@index}}" class="btn btn-danger float-right">Delete</button>
+                <button data-sessionUpdate="closed" data-sessionSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" id="updateSession{{@index}}" class="mr-4 btn btn-success float-right">Open</button>
+            {{else}} 
+            <li class="mb-2 border border-success rounded list-group-item">
+                <a href="/participants?sessionSid={{this.sid}}&serviceSid={{serviceSid}}">{{this.uniqueName}}</a>
+                <button data-sessionSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" id="delSession{{@index}}" class="btn btn-danger float-right">Delete</button>
+                <button data-sessionUpdate="notClosed" data-sessionSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" id="updateSession{{@index}}" class="mr-4 btn btn-warning float-right">Close</button>
+            {{/ifCond}}
         </li>
         {{/each}}
     </ul>
@@ -37,46 +46,73 @@
                     <button data-serviceSid="{{serviceSid}}" id="createSession" type="button" class="btn btn-primary">Submit</button>
                 </div>
                 <div id="modal-error" class="mx-4 alert alert-danger" role="alert" style="display:none">
-                    <span id="errorMsg"></span>
+                    <span id="errorMsgModal"></span>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<br>
+<div id="errorDiv" class="mx-4 alert alert-danger" role="alert" style="display:none">
+    <span id="errorMsgMain"></span>
+</div>
 
 <script>
-    let i = 0;
-    while($(`#delSession${i}`).length)
+    //Script for deleting a session
+    let delCounter = 0;
+    while($(`#delSession${delCounter}`).length)
     {
-        let element = $(`#delSession${i}`);
-        element.click(() => {
+        let delSession = $(`#delSession${delCounter}`);
+        delSession.click(() => {
             $.ajax({
-                url: `/sessionDelete?serviceSid=${element[0].attributes["data-serviceSid"].value}&sessionSid=${element[0].attributes["data-sessionSid"].value}`,
+                url: `/sessionDelete?serviceSid=${delSession[0].attributes["data-serviceSid"].value}&sessionSid=${delSession[0].attributes["data-sessionSid"].value}`,
                 type: 'POST',
             }).done((data) => {
                 location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
                 //setTimeout(location.reload.bind(location), 8000);
             }).fail((xhr, status, error) => {
-                $('#modal-error').show();
-                $('#errorMsg').text(xhr.responseText);
+                $('#errorDiv').show();
+                $('#errorMsgMain').text(xhr.responseText);
             });
         });
-        i++;
+        delCounter++;
     }
 
-    let element = $('#createSession');
+    //Script for updating a session
+    let updateCounter = 0;
+    while($(`#updateSession${updateCounter}`).length)
+    {
+        let updateSession = $(`#updateSession${updateCounter}`);
+        updateSession.click(() => {
+            $.ajax({
+                url: `/sessionUpdate?serviceSid=${updateSession[0].attributes["data-serviceSid"].value}&sessionSid=${updateSession[0].attributes["data-sessionSid"].value}&updateStatus=${updateSession[0].attributes["data-sessionUpdate"].value}`,
+                type: 'POST',
+            }).done((data) => {
+                location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
+                //setTimeout(location.reload.bind(location), 8000);
+            }).fail((xhr, status, error) => {
+                $('#errorDiv').show();
+                $('#errorMsgMain').text(xhr.responseText);
+            });
+        });
+        updateCounter++;
+    }
+
+    //Script for creating a session
+    let createSession = $('#createSession');
     let uniqueName = $('#uniqueName');
-    element.click(() => {
+    createSession.click(() => {
         //Need to update this to be a POST and to use AXIOS
         $.ajax({
-            url: `/createSession?serviceSid=${element[0].attributes["data-serviceSid"].value}&uniqueName=${uniqueName[0].value}`,
+            url: `/createSession?serviceSid=${createSession[0].attributes["data-serviceSid"].value}&uniqueName=${uniqueName[0].value}`,
             type: 'POST',
         }).done((data) => {
             location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
             //setTimeout(location.reload.bind(location), 8000);
         }).fail((xhr, status, error) => {
             $('#modal-error').show();
-            $('#errorMsg').text(xhr.responseText);
+            $('#errorMsgModal').text(xhr.responseText);
         });
     });
+
 </script>

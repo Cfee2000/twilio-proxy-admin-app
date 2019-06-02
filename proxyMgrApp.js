@@ -11,8 +11,43 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 //Handlebars middleware
-app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.engine('handlebars', exphbs({
+    defaultLayout: 'main',
+    partialsDir: 'views/partials',
+    layoutsDir: 'views/layouts'
+}));
 app.set('view engine', 'handlebars');
+
+const hbs = require('handlebars'); //??
+
+//Handlebar helpers
+hbs.registerHelper('ifCond', function (v1, operator, v2, options) {
+
+    switch (operator) {
+        case '==':
+            return (v1 == v2) ? options.fn(this) : options.inverse(this);
+        case '===':
+            return (v1 === v2) ? options.fn(this) : options.inverse(this);
+        case '!=':
+            return (v1 != v2) ? options.fn(this) : options.inverse(this);
+        case '!==':
+            return (v1 !== v2) ? options.fn(this) : options.inverse(this);
+        case '<':
+            return (v1 < v2) ? options.fn(this) : options.inverse(this);
+        case '<=':
+            return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+        case '>':
+            return (v1 > v2) ? options.fn(this) : options.inverse(this);
+        case '>=':
+            return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+        case '&&':
+            return (v1 && v2) ? options.fn(this) : options.inverse(this);
+        case '||':
+            return (v1 || v2) ? options.fn(this) : options.inverse(this);
+        default:
+            return options.inverse(this);
+    }
+});
 
 // Body Parser Middleware
 app.use(express.json());
@@ -98,6 +133,33 @@ app.post('/sessionDelete', (req, res) => {
     });       
 });
 
+app.post('/sessionUpdate', (req, res) => {
+    if(req.query.updateStatus == 'closed'){
+        client.proxy.services(req.query.serviceSid)
+        .sessions(req.query.sessionSid)
+        .update({status: "in-progress"}, (err, items) => {
+            if(err){
+                console.log(err);
+                res.status(err.status).send(err.message);
+            }else{
+                res.send(items);
+            }
+        });
+    }
+    else{
+        client.proxy.services(req.query.serviceSid)
+        .sessions(req.query.sessionSid)
+        .update({status: "closed"}, (err, items) => {
+            if(err){
+                console.log(err);
+                res.status(err.status).send(err.message);
+            }else{
+                res.send(items);
+            }
+        });
+    }
+})
+
 app.post('/createParticipant', (req, res) => {
     createParticipant(req, res);     
 });
@@ -140,6 +202,7 @@ async function getServices(res) {
 
 async function getSessions(query, res) {
     let sessionsList = await client.proxy.services.get(query.sid).sessions.list();
+    let isClosed = 
     res.render('sessions', {
         sessions: sessionsList,
         serviceSid: query.sid

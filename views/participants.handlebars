@@ -9,7 +9,7 @@
 <h3>Participants</h3>
 <ul class="list-group">
     {{#each participants}}
-    <li class="list-group-item">
+    <li class="mb-2 rounded list-group-item">
         
         <span><a href="/interactions?sessionSid={{sessionSid}}&serviceSid={{serviceSid}}&participantName={{this.friendlyName}}&participantSid={{this.sid}}&participantPhone={{this.identifier}}&participantProxyNum={{this.proxyIdentifier}}">{{this.friendlyName}}</a>  ({{this.sid}})</span><br>
         <span class="ml ml-2">Real # ({{this.identifier}})</span>
