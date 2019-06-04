@@ -87,7 +87,6 @@ async function createService(req, res){
     }catch(err){
         console.log(err);
         res.status(err.status).send(err.message);
-        //Do i really want to catch and throw a custom error? I may just want to NOT catch it and let the ajax .failure handle upstream?
     }
 }
 
@@ -116,7 +115,6 @@ async function createSession(req, res){
     }catch(err){
         console.log(err);
         res.status(err.status).send(err.message);
-        //Do i really want to catch and throw a custom error? I may just want to NOT catch it and let the ajax .failure handle upstream?
     }
 }
 
@@ -172,10 +170,62 @@ async function createParticipant(req, res){
             .create({friendlyName: req.query.friendlyName, identifier: req.query.identifier});
         res.send(result.sid);
     }catch(err){
+        console.log(err);
+        res.status(err.status).send(err.message);
+    }
+}
+
+
+app.post('/addExistingParticipant', (req, res) => {
+    addExistingParticipant(req, res); 
+});
+
+async function addExistingParticipant(req, res){
+    try{
+        let participant;
+        let sessionList = await client.proxy.services(req.query.serviceSid)
+            .sessions
+            .list();
+        for(const [index, session] of sessionList.entries())
+        {
+            try{
+                participant = await client.proxy.services(req.query.serviceSid) 
+                    .sessions(session.sid)
+                    .participants(req.query.participantSid)
+                    .fetch();
+                if(participant)
+                {
+                    break; //found the participant
+                }
+            }catch(err){
+                if(err.status = '404'){
+                    //Swallow. Keep looking for participant
+                }
+            }
+        }
+        if(participant)
+        {
+            let result2 = await client.proxy.services(req.query.serviceSid)
+                .sessions(req.query.sessionSid)
+                .update({participants: [participant]});
+            res.send(result2);
+        }
+        else{
+            throw new Error(`No Participant Found for SID ${req.query.participantSid}`);
+        }
+
+    }catch(err){
        console.log(err);
        //next(err);
-       res.status(err.status).send(err.message);
-        //Do i really want to catch and throw a custom error? I may just want to NOT catch it and let the ajax .failure handle upstream?
+       if(err.status)
+       {
+        res.status(err.status).send(err.message);
+       }
+       else
+       {
+           res.status("400").send(err.message);
+       }
+       
     }
 }
 
@@ -193,6 +243,29 @@ app.post('/participantDelete', (req, res) => {
     });           
 });
 
+app.post('/reservePhone', (req, res) => {
+    reservePhone(req, res);
+})
+
+async function reservePhone(req, res) {
+    let reserve = (req.query.isReserved == 'false');
+    try{
+        let result = await client.proxy.services(req.query.serviceSid)
+                .phoneNumbers(req.query.phoneSid)
+                .update({isReserved: reserve}, (err, items) => {
+                    if(err){
+                        console.log(err);
+                        res.status(err.status).send(err.message);
+                    }else{
+                        res.send(items);
+                    }
+                });
+    }catch(err){
+        console.log(err);
+        res.status(err.status).send(err.message);
+    }
+}
+
 async function getServices(res) {
     let servicesList = await client.proxy.services.list();
     res.render('services', {
@@ -201,22 +274,82 @@ async function getServices(res) {
 }
 
 async function getSessions(query, res) {
+    let phoneAndParticipantList = [
+        { 
+            SNSid: "",
+            PNSid: "", //PN Sid will be the same as Participant Proxy Identifier SID
+            ProxyPNNumber: "", //PN number will be same as Proxy Participant Number
+            InUse: 0,
+            IsReserved: false,
+            ParticipantVals: [
+                {
+                    ParticipantSid: "",
+                    ParticipantRealNumber: "",
+                    ParticipantFriendlyName: "",
+                }
+            ]
+        }
+    ];
+    phoneAndParticipantList.pop();
+    let phoneNumbersList = await client.proxy.services.get(query.sid).phoneNumbers.list();
+
+    for(const [index, nums] of phoneNumbersList.entries())
+    {
+        phoneAndParticipantList.push(
+            {
+                SNSid: "",
+                PNSid: nums.sid,
+                ProxyPNNumber: nums.phoneNumber,
+                InUse: nums.inUse,
+                IsReserved: nums.isReserved,
+                ParticipantVals: [
+                    {
+                        ParticipantFriendlyName: "",
+                        ParticipantRealNumber: "",
+                        ParticipantSid: ""
+                    }
+                ]
+            }
+        );
+
+    }
+
     let sessionsList = await client.proxy.services.get(query.sid).sessions.list();
-    let isClosed = 
+
+    for(const [index, session] of sessionsList.entries())
+    {
+        let participantsList = await client.proxy.services(query.sid).sessions(session.sid).participants.list();
+        for(const [index, participant] of participantsList.entries())
+        {
+            for(const [index, phoneNums] of phoneAndParticipantList.entries())
+            {
+                phoneAndParticipantList[index].SNSid = session.sid;
+                if(phoneNums.PNSid == participant.proxyIdentifierSid)
+                {
+                    phoneAndParticipantList[index].ParticipantVals.push(
+                        {
+                            ParticipantFriendlyName: participant.friendlyName,
+                            ParticipantRealNumber: participant.identifier,
+                            ParticipantSid: participant.sid
+                        }
+                    )
+                }
+            }
+            
+        }
+    }
+
     res.render('sessions', {
+        phoneAndParticipant: phoneAndParticipantList,
         sessions: sessionsList,
         serviceSid: query.sid
     });
 }
 
 async function getParticipants(query, res) {
-    let phoneNumbersList = await client.proxy.services.get(query.serviceSid).phoneNumbers.list()//probably need to also make sure not reserved?
-    let phoneNumbersNotInUse = phoneNumbersList.filter((phoneNumber) => phoneNumber.inUse == 0); //we want to display only available phone numbers
-
     let participantsList = await client.proxy.services(query.serviceSid).sessions(query.sessionSid).participants.list();
     res.render('participants', {
         participants: participantsList,
-        phoneNumbers: phoneNumbersNotInUse,
         sessionSid: query.sessionSid,
         serviceSid: query.serviceSid
     }); 
