@@ -53,11 +53,47 @@ node proxyMgrApp.js
 
 The links and buttons in the app will self-direct you to where you want to go
 
-## Creating Services, Sessions, and Participants
+## Services Page
 
-The app will facilitate the ability for you to create Services, Sessions, and Participants via modal windows on their respective pages.
+Currently, the app lets you create a Service in minimal fashion, whereby you supply a Service Name and it creates a Service with all defaults applied. 
 
-#### PII
+All Services are currently shown in a list. Clicking on a Service will take you to the Session page for that Service.
+
+## Sessions Page
+
+Currently, the app lets you create a Session in minimal fashion, whereby you supply a Session Name and it creates a Session with all defaults applied. I'm planning an update to allow Time To Live and Mode to be optional parameters to specify when creating a Session.
+
+Each session had a border color of either green (for open sessions) or yellow/orange (for closed sessions). You can toggle open/closed for each session with the "Close" button. *Note: re-opening a closed session sets the session status to "in-progress", not "open"*.
+
+Sessions can be deleted with the "Delete" button.
+
+Clicking on a Session will take you to the Participants page for that Session.
+
+### Phone Numbers
+
+The Sessions page also has the list of Phone Numbers that have been assigned to the Proxy Service contianing these Sessions. Each Phone Number has a border color of either green (not in use) or yellow/orange (in use). 
+
+If the Phone Number is in use or reserved, it will be textually notated in each row of the list. There is a toggle button for each row as well to reserve/unreserve a given number.
+
+If the Phone Number is in use, a "View Assigned" button will show that allows you to view each participant that is assigned to that number (by Participant SID). Hovering over the Participant SID will show the Friendly Name of the Participant (as the title), the Participant Phone # of the Participant, and the Session that Participant is assigned the number.
+
+Clicking the "Add Phone Numbers" button will contextually take you to the Twilio Console Proxy Numbers page where you can assign/provision numbers to your number pool.
+
+
+## Participants Page
+
+The Participants page shows each participant currently assigned to the given Session. The Friendly Name of the Participant is shown and links to that Participant's Interactions. The Participant SID, Participant #, and Proxy # are shown as part of the visual context for the given Participant.
+
+Particpants can be deleted with the "Delete" button.
+
+There is also a "Quick Create" button that allows you to create a Participant. You must specify a Friendly Name and Participant Phone # to create a Participant. Optionally, you can specify a Proxy # to assign directly to the Participant (rather than letting the Proxy Service choose from your pool of numbers).
+
+
+## Interactions Page
+
+Each Interaction for the given Participant is shown on the Interactions page, with tabular data for each interaction. Note the "Has Recording" column will show a "YES" or "NO" for whether a recording was taken as part of the interaction. If so, then "YES" will show and will link contextually to the Recording in the Twilio Console to play back, download, delete, etc.
+
+## PII
 Note that when creating a new Participant, the "Friendly Name" you provide in the modal window should not include a participants real name. See https://www.twilio.com/docs/proxy/api/participant#create-a-participant-resource and https://www.twilio.com/docs/glossary/what-is-personally-identifiable-information-pii#pii-fields. 
 
 ## Authors
