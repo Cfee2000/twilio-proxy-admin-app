@@ -175,60 +175,6 @@ async function createParticipant(req, res){
     }
 }
 
-
-app.post('/addExistingParticipant', (req, res) => {
-    addExistingParticipant(req, res); 
-});
-
-async function addExistingParticipant(req, res){
-    try{
-        let participant;
-        let sessionList = await client.proxy.services(req.query.serviceSid)
-            .sessions
-            .list();
-        for(const [index, session] of sessionList.entries())
-        {
-            try{
-                participant = await client.proxy.services(req.query.serviceSid) 
-                    .sessions(session.sid)
-                    .participants(req.query.participantSid)
-                    .fetch();
-                if(participant)
-                {
-                    break; //found the participant
-                }
-            }catch(err){
-                if(err.status = '404'){
-                    //Swallow. Keep looking for participant
-                }
-            }
-        }
-        if(participant)
-        {
-            let result2 = await client.proxy.services(req.query.serviceSid)
-                .sessions(req.query.sessionSid)
-                .update({participants: [participant]});
-            res.send(result2);
-        }
-        else{
-            throw new Error(`No Participant Found for SID ${req.query.participantSid}`);
-        }
-
-    }catch(err){
-       console.log(err);
-       //next(err);
-       if(err.status)
-       {
-        res.status(err.status).send(err.message);
-       }
-       else
-       {
-           res.status("400").send(err.message);
-       }
-       
-    }
-}
-
 app.post('/participantDelete', (req, res) => {
     client.proxy.services(req.query.serviceSid)
     .sessions(req.query.sessionSid)
@@ -297,7 +243,7 @@ async function getSessions(query, res) {
     {
         phoneAndParticipantList.push(
             {
-                SNSid: "",
+                SessionName: "",
                 PNSid: nums.sid,
                 ProxyPNNumber: nums.phoneNumber,
                 InUse: nums.inUse,
@@ -323,7 +269,7 @@ async function getSessions(query, res) {
         {
             for(const [index, phoneNums] of phoneAndParticipantList.entries())
             {
-                phoneAndParticipantList[index].SNSid = session.sid;
+                phoneAndParticipantList[index].SessionName = session.uniqueName;
                 if(phoneNums.PNSid == participant.proxyIdentifierSid)
                 {
                     phoneAndParticipantList[index].ParticipantVals.push(
