@@ -52,12 +52,121 @@
         </div>
     </div>
 </div>
+<div class="vw-Assigned">
+    <!-- Modal HTML -->
+    <div id="viewAssigned" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assigned Participants</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                      
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<br>
+<h3>Phone Numbers</h3>
+<ul class="list-group">
+    {{#each phoneAndParticipant}}
+       <span hidden id="countPart{{@index}}"></span>
+        {{#ifCond this.InUse ">" 0}}
+            {{#ifCond this.IsReserved "==" true}}
+            <li class="mb-2 border border-warning rounded list-group-item">
+                <span>{{this.ProxyPNNumber}} <i>(In Use and Reserved)</i></span>
+                <button data-serviceSid="{{../serviceSid}}" data-isReserved="{{this.IsReserved}}" data-phoneSid="{{this.PNSid}}" id="reserve{{@index}}" class="btn btn-danger float-right">UnReserve</button>
+                {{#ifCond this.ParticipantVals.length ">" 1}}
+                    <a href="#viewAssigned" id="{{@index}}" role="button" class="mr-4 btn btn-primary float-right" data-toggle="modal" >View Assigned</a>
+                    {{#each this.ParticipantVals}}
+                        <span hidden id="hidden{{@../index}}{{@index}}" data-participantSid="{{this.ParticipantSid}}" data-participantRealNumber="{{this.ParticipantRealNumber}}" data-participantFriendlyName="{{this.ParticipantFriendlyName}}"></span>
+                    {{/each}}
+                {{/ifCond}}
+            </li>
+            {{else}}
+            <li class="mb-2 border border-warning rounded list-group-item">
+                <span>{{this.ProxyPNNumber}} <i>(In Use)</i></span>
+                <button data-serviceSid="{{../serviceSid}}" data-isReserved="{{this.IsReserved}}" data-phoneSid="{{this.PNSid}}" id="reserve{{@index}}" class="btn btn-success float-right">Reserve</button>
+                {{#ifCond this.ParticipantVals.length ">" 1}}
+                    <a href="#viewAssigned" id="{{@index}}" role="button" class="mr-4 btn btn-primary float-right" data-toggle="modal" >View Assigned</a>
+                    {{#each this.ParticipantVals}}
+                        <span hidden id="hidden{{@../index}}{{@index}}" data-participantSid="{{this.ParticipantSid}}" data-participantRealNumber="{{this.ParticipantRealNumber}}" data-participantFriendlyName="{{this.ParticipantFriendlyName}}"></span>
+                    {{/each}}
+                {{/ifCond}}
+            </li>            
+            {{/ifCond}}
+        {{else}}
+            {{#ifCond this.IsReserved "==" true}}
+            <li class="mb-2 border border-success rounded list-group-item">
+                <span>{{this.ProxyPNNumber}} <i>(Reserved)</i></span>
+                <button data-serviceSid="{{../serviceSid}}" data-isReserved="{{this.IsReserved}}" data-phoneSid="{{this.PNSid}}" id="reserve{{@index}}" class="btn btn-danger float-right">UnReserve</button>
+            </li>
+            {{else}}
+            <li class="mb-2 border border-success rounded list-group-item">
+                <span>{{this.ProxyPNNumber}}</span>
+                <button data-serviceSid="{{../serviceSid}}" data-isReserved="{{this.IsReserved}}" data-phoneSid="{{this.PNSid}}" id="reserve{{@index}}" class="btn btn-success float-right">Reserve</button>
+            </li>
+            {{/ifCond}}
+        {{/ifCond}}    
+    {{/each}}
+</ul>
+<br>
+<a target="_blank" class="btn btn-lg btn-primary" href="https://www.twilio.com/console/proxy/services/{{serviceSid}}/proxy_numbers" role="button">Add Phone Numbers</a></button>
 <br>
 <div id="errorDiv" class="mx-4 alert alert-danger" role="alert" style="display:none">
     <span id="errorMsgMain"></span>
 </div>
 
 <script>
+    $('#viewAssigned').on('show.bs.modal', function(e) {
+        let id = $(e.relatedTarget)[0].id;
+        $(`[id^=hidden${id}]`).each((index, element) => {
+            if(element.dataset.participantsid != "")
+            {
+                let psid = element.dataset.participantsid;
+                let pname = element.dataset.participantfriendlyname;
+                let pnum = element.dataset.participantrealnumber;
+                $('.modal-body').append(`<p><a href="#" class="popover-test" title="${pname}" data-content="Real Number:${pnum}" id="sid">${psid}</a></p>`);
+                $('.modal-body #sid').popover({trigger: "hover"});
+            }
+
+        });
+    });
+    $('#viewAssigned').on('hide.bs.modal', function(e) {
+        $('.modal-body').empty();
+    });
+
+    let i = 0;
+    while($(`#countPart${i}`).length)
+    {
+        i++;
+    }
+    for(j = 0; j <= i; j++)
+    {
+        if($(`#reserve${j}`).length)
+        {
+            let element = $(`#reserve${j}`);
+            element.click(() => {
+                $.ajax({
+                    url: `/reservePhone?serviceSid=${element[0].attributes["data-serviceSid"].value}&phoneSid=${element[0].attributes["data-phoneSid"].value}&isReserved=${element[0].attributes["data-isReserved"].value}`,
+                    type: 'POST',
+                }).done((data) => {
+                    location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
+                    //setTimeout(location.reload.bind(location), 8000);
+                }).fail((xhr, status, error) => {
+                    $('#errorDiv').show();
+                    $('#errorMsgMain').text(xhr.responseText);
+                });
+            });        
+        }
+    }
+    
     //Script for deleting a session
     let delCounter = 0;
     while($(`#delSession${delCounter}`).length)
