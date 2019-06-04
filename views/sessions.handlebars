@@ -85,7 +85,7 @@
                 {{#ifCond this.ParticipantVals.length ">" 1}}
                     <a href="#viewAssigned" id="{{@index}}" role="button" class="mr-4 btn btn-primary float-right" data-toggle="modal" >View Assigned</a>
                     {{#each this.ParticipantVals}}
-                        <span hidden id="hidden{{@../index}}{{@index}}" data-participantSid="{{this.ParticipantSid}}" data-participantRealNumber="{{this.ParticipantRealNumber}}" data-participantFriendlyName="{{this.ParticipantFriendlyName}}"></span>
+                        <span hidden id="hidden{{@../index}}{{@index}}" data-sessionName="{{../SessionName}}" data-participantSid="{{this.ParticipantSid}}" data-participantRealNumber="{{this.ParticipantRealNumber}}" data-participantFriendlyName="{{this.ParticipantFriendlyName}}"></span>
                     {{/each}}
                 {{/ifCond}}
             </li>
@@ -96,7 +96,7 @@
                 {{#ifCond this.ParticipantVals.length ">" 1}}
                     <a href="#viewAssigned" id="{{@index}}" role="button" class="mr-4 btn btn-primary float-right" data-toggle="modal" >View Assigned</a>
                     {{#each this.ParticipantVals}}
-                        <span hidden id="hidden{{@../index}}{{@index}}" data-participantSid="{{this.ParticipantSid}}" data-participantRealNumber="{{this.ParticipantRealNumber}}" data-participantFriendlyName="{{this.ParticipantFriendlyName}}"></span>
+                        <span hidden id="hidden{{@../index}}{{@index}}" data-sessionName="{{../SessionName}}" data-participantSid="{{this.ParticipantSid}}" data-participantRealNumber="{{this.ParticipantRealNumber}}" data-participantFriendlyName="{{this.ParticipantFriendlyName}}"></span>
                     {{/each}}
                 {{/ifCond}}
             </li>            
@@ -129,10 +129,11 @@
         $(`[id^=hidden${id}]`).each((index, element) => {
             if(element.dataset.participantsid != "")
             {
+                let sessionName = element.dataset.sessionname;
                 let psid = element.dataset.participantsid;
                 let pname = element.dataset.participantfriendlyname;
                 let pnum = element.dataset.participantrealnumber;
-                $('.modal-body').append(`<p><a href="#" class="popover-test" title="${pname}" data-content="Real Number:${pnum}" id="sid">${psid}</a></p>`);
+                $('.modal-body').append(`<p><a href="#" class="popover-test" title="${pname}" data-content="Real Number: ${pnum}\nSessionName: ${sessionName}" id="sid">${psid}</a></p>`);
                 $('.modal-body #sid').popover({trigger: "hover"});
             }
 

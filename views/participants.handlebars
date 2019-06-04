@@ -24,7 +24,6 @@
 
 <!-- Button HTML (to Trigger Modal) -->
 <a href="#modalParticipant" role="button" class="mr-4 btn btn-lg btn-primary" data-toggle="modal">Quick Create</a>
-{{!-- <a href="#modalParticipantExisting" role="button" class="btn btn-lg btn-primary" data-toggle="modal">Add Existing</a> --}}
 
 <!-- Modal HTML -->
 
@@ -65,26 +64,6 @@
             </div>
         </div>
     </div>
-<div id="modalParticipantExisting" class="modal fade" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add Existing Participant</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <span class="mr-2">Participant SID:</span><input class="form-control" id="participantSID" type="text" required></input>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button data-serviceSid="{{serviceSid}}" data-sessionSid="{{sessionSid}}" id="addExistingParticipant" type="button" class="btn btn-primary">Submit</button>
-            </div>
-            <div id="modal-errorAdd" class="mx-4 alert alert-danger" role="alert" style="display:none">
-                <span id="errorMsgAdd"></span>
-            </div>
-        </div>
-    </div>
-</div>
 <br>
 
 <div id="errorDiv" class="mx-4 alert alert-danger" role="alert" style="display:none">
@@ -152,20 +131,6 @@
 
     });
 
-    let addExistPart = document.getElementById('addExistingParticipant');
-    let partSID = document.getElementById('participantSID');
-    addExistPart.addEventListener('click', () => {
-        $.ajax({
-            url: `/addExistingParticipant?serviceSid=${addExistPart.attributes["data-serviceSid"].value}&sessionSid=${addExistPart.attributes["data-sessionSid"].value}&participantSid=${partSID.value}`,
-            type: 'POST',
-        }).done((data) => {
-            location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
-            //setTimeout(location.reload.bind(location), 8000);
-        }).fail((xhr, status, error) => {
-            $('#modal-errorAdd').show();
-            $('#errorMsgAdd').text(xhr.responseText);
-        });
-    });
 </script>
 
 
