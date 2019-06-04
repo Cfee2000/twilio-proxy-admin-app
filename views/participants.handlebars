@@ -12,7 +12,7 @@
     <li class="mb-2 rounded list-group-item">
         
         <span><a href="/interactions?sessionSid={{sessionSid}}&serviceSid={{serviceSid}}&participantName={{this.friendlyName}}&participantSid={{this.sid}}&participantPhone={{this.identifier}}&participantProxyNum={{this.proxyIdentifier}}">{{this.friendlyName}}</a>  ({{this.sid}})</span><br>
-        <span class="ml ml-2">Real # ({{this.identifier}})</span>
+        <span class="ml ml-2">Participant # ({{this.identifier}})</span>
         <span class="ml ml-2">Proxy # ({{this.proxyIdentifier}})</span>
 
         <button data-participantSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" data-sessionSid="{{sessionSid}}" id="del{{@index}}" class="btn btn-danger float-right">Delete</button>

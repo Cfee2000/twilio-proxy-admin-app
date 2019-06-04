@@ -133,7 +133,7 @@
                 let psid = element.dataset.participantsid;
                 let pname = element.dataset.participantfriendlyname;
                 let pnum = element.dataset.participantrealnumber;
-                $('.modal-body').append(`<p><a href="#" class="popover-test" title="${pname}" data-content="Real Number: ${pnum}\nSessionName: ${sessionName}" id="sid">${psid}</a></p>`);
+                $('.modal-body').append(`<p><a href="#" class="popover-test" title="${pname}" data-content="Participant #: ${pnum}\nSessionName: ${sessionName}" id="sid">${psid}</a></p>`);
                 $('.modal-body #sid').popover({trigger: "hover"});
             }
 
