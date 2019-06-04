@@ -167,7 +167,7 @@ async function createParticipant(req, res){
         let result = await client.proxy.services(req.query.serviceSid)
             .sessions(req.query.sessionSid)
             .participants
-            .create({friendlyName: req.query.friendlyName, identifier: req.query.identifier});
+            .create({friendlyName: req.query.friendlyName, identifier: "+" + req.query.identifier, proxyIdentifier: "+" + req.query.proxyIdentifier});
         res.send(result.sid);
     }catch(err){
         console.log(err);
