@@ -43,14 +43,14 @@
                                 Please provide a Friendly Name.
                             </div>
                         <label for="identifier" class="mr-2">Participant Phone #:</label>
-                            <input class="form-control" id="identifier"  type="tel" required></input>
+                            <input class="form-control" id="identifier"  type="tel" pattern="^\+?[1-9]\d{4,14}$" required></input>
                             <div class="invalid-feedback">
-                                Please provide a Participant Phone #.
+                                Needs to be a valid E.164 Phone Number.
                             </div>
                         <label for="proxyIdentifier" class="mr-2">Assigned Proxy # <i>(optional)</i>:</label>
                             <input class="form-control" id="proxyIdentifier"  type="tel"></input>
                             <div class="invalid-feedback">
-                                Needs to be a valid E164 Phone Number
+                                Needs to be a valid E.164 Phone Number.
                             </div>
                     </div>
                     <div class="modal-footer">
@@ -95,7 +95,11 @@
 
     $(document).ready(function(){
         $('#identifier, #proxyIdentifier').inputmask({
-            "regex": "^(?:(?:\\+?1\\s*(?:[.-]\\s*)?)?(?:\\(\\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\\s*\\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\\s*(?:[.-]\\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\\s*(?:[.-]\\s*)?([0-9]{4})(?:\\s*(?:#|x\\.?|ext\\.?|extension)\\s*(\\d+))?$"
+            "regex": "^\\+?[1-9]\\d{4,14}$"
+                             {{!-- "regex": "\\+?(9[976]\\d|8[987530]\\d|6[987]\\d|5[90]\\d|42\\d|3[875]\\d|2[98654321]\\d|9[8543210]|8[6421]|6[6543210]|5[87654321]|4[987654310]|3[9643210]|2[70]|7|1)?\\W*\\d\\W*\\d\\W*\\d\\W*\\d\\W*\\d\\W*\\d\\W*\\d\\W*\\d\\W*(\\d{1,2})$" --}}
+                               {{!-- "regex": "^(?:(?:\\+?1\\s*(?:[.-]\\s*)?)?(?:(\\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\\s*)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\\s*(?:[.-]\\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\\s*(?:[.-]\\s*)?([0-9]{4})$" --}}
+        
+                                {{!-- "regex": "^(?:(?:\\+?1\\s*(?:[.-]\\s*)?)?(?:\\(\\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\\s*\\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\\s*(?:[.-]\\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\\s*(?:[.-]\\s*)?([0-9]{4})(?:\\s*(?:#|x\\.?|ext\\.?|extension)\\s*(\\d+))?$" --}}
         }); //specifying options
     });
     let i = 0;
