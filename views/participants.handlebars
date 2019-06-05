@@ -36,19 +36,19 @@
                     <h5 class="modal-title">Create Participant</h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
-                <form action="#" class="needs-validation" novalidate="">
+                <form action="#" class="participantValidation" novalidate="">
                     <div class="modal-body">
                         <label for="friendlyName" class="mr-2">Friendly Name:</label>
                             <input class="form-control" id="friendlyName" type="text" required></input>
                             <div class="invalid-feedback">
                                 Please provide a Friendly Name.
                             </div>
-                        <label for="identifier" class="mr-2">Participant Phone #:</label>
+                        <label for="identifier" class="mr-2 mt-2">Participant Phone #:</label>
                             <input class="form-control" id="identifier"  type="tel" pattern="^\+?[1-9]\d{4,14}$" required></input>
                             <div class="invalid-feedback">
                                 Needs to be a valid E.164 Phone Number.
                             </div>
-                        <label for="proxyIdentifier" class="mr-2">Assigned Proxy # <i>(optional)</i>:</label>
+                        <label for="proxyIdentifier" class="mr-2 mt-2">Assigned Proxy # <i>(optional)</i>:</label>
                             <input class="form-control" id="proxyIdentifier"  type="tel"></input>
                             <div class="invalid-feedback">
                                 Needs to be a valid E.164 Phone Number.
@@ -91,7 +91,6 @@
         </div>
     </div>
 <br>
-<span hidden id="JWT"></span>
 <div id="errorDiv" class="mx-4 alert alert-danger" role="alert" style="display:none">
     <span id="errorMsgMain"></span>
 </div>
@@ -99,11 +98,7 @@
 <script>
     $(document).ready(function(){
         $('#identifier, #proxyIdentifier').inputmask({
-            "regex": "^\\+?[1-9]\\d{4,14}$"
-                             {{!-- "regex": "\\+?(9[976]\\d|8[987530]\\d|6[987]\\d|5[90]\\d|42\\d|3[875]\\d|2[98654321]\\d|9[8543210]|8[6421]|6[6543210]|5[87654321]|4[987654310]|3[9643210]|2[70]|7|1)?\\W*\\d\\W*\\d\\W*\\d\\W*\\d\\W*\\d\\W*\\d\\W*\\d\\W*\\d\\W*(\\d{1,2})$" --}}
-                               {{!-- "regex": "^(?:(?:\\+?1\\s*(?:[.-]\\s*)?)?(?:(\\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\\s*)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\\s*(?:[.-]\\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\\s*(?:[.-]\\s*)?([0-9]{4})$" --}}
-        
-                                {{!-- "regex": "^(?:(?:\\+?1\\s*(?:[.-]\\s*)?)?(?:\\(\\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\\s*\\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\\s*(?:[.-]\\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\\s*(?:[.-]\\s*)?([0-9]{4})(?:\\s*(?:#|x\\.?|ext\\.?|extension)\\s*(\\d+))?$" --}}
+            "regex": "^\\+?[1-9]\\d{4,14}$"                        
         }); //specifying options
     });
 
@@ -124,14 +119,14 @@
         });
     });
 
-    $('.needs-validation').submit((event) => {
-        if ($('.needs-validation')[0].checkValidity() === false) {
+    $('.participantValidation').submit((event) => {
+        if ($('.participantValidation')[0].checkValidity() === false) {
             event.preventDefault();
             event.stopPropagation();
-            $('.needs-validation').addClass('was-validated');
+            $('.participantValidation').addClass('was-validated');
         }
         else{
-            $('.needs-validation').addClass('was-validated');
+            $('.participantValidation').addClass('was-validated');
             event.preventDefault(); //This is absolutly necessary to prevent Promise Rejection warnings
             let serviceSid = event.currentTarget.createParticipant.attributes.getNamedItem("data-serviceSid").value;
             let sessionSid = event.currentTarget.createParticipant.attributes.getNamedItem("data-sessionSid").value;
@@ -146,9 +141,7 @@
             }).fail((xhr, status, error) => {
                 $('#modal-errorCreate').show();
                 $('#errorMsgCreate').text(xhr.responseText);
-            }).always((always) => {
-                console.log('always');
-            })          
+            });          
         }
 
     });
@@ -167,13 +160,13 @@
             $('#modal-successDial').show();
             $('#successMsgDial').text("JWT Token Generated Successfully");
         }).fail((xhr, status, error) => {
-            $('#JWT').empty(); //clear token value
+            sessionStorage.removeItem('accessToken');
             $('#errorMsgMain').text(xhr.responseText);
             $('#modalCall').hide();
-        })
+        });
     });
     $('#modalCall').on('hide.bs.modal', function(e) {
-   
+        $('#errorMsgCreate').empty();
     });
 
     $('#initiateDial').click((event) => {
@@ -181,17 +174,21 @@
         let proxyPhone = event.currentTarget.attributes.getNamedItem("data-proxyPhone").value;
         //let token = $('#JWT').text();
         let token = sessionStorage.getItem('accessToken');
-
-        // Setup Twilio.Device
-        device = new Twilio.Device(token, {
-        // Set Opus as our preferred codec. Opus generally performs better, requiring less bandwidth and
-        // providing better audio quality in restrained network conditions. Opus will be default in 2.0.
-        codecPreferences: ['opus', 'pcmu'],
-        // Use fake DTMF tones client-side. Real tones are still sent to the other end of the call,
-        // but the client-side DTMF tones are fake. This prevents the local mic capturing the DTMF tone
-        // a second time and sending the tone twice. This will be default in 2.0.
-        fakeLocalDTMF: true,
-      });
+        try{
+            // Setup Twilio.Device
+            device = new Twilio.Device(token, {
+                // Set Opus as our preferred codec. Opus generally performs better, requiring less bandwidth and
+                // providing better audio quality in restrained network conditions. Opus will be default in 2.0.
+                codecPreferences: ['opus', 'pcmu'],
+                // Use fake DTMF tones client-side. Real tones are still sent to the other end of the call,
+                // but the client-side DTMF tones are fake. This prevents the local mic capturing the DTMF tone
+                // a second time and sending the tone twice. This will be default in 2.0.
+                fakeLocalDTMF: true,
+            });
+        }catch(err){
+            $('#modal-errorCreate').show();
+            $('#errorMsgCreate').text(err.message + " Close modal window and reopen to fetch new Access Token.");
+        }
 
       device.on('ready',function (device) {
         console.log('Twilio.Device Ready!');
@@ -207,7 +204,7 @@
 
     $('#hangupCall').click((event) => {
         if (device) {
-        device.disconnectAll();
+            device.disconnectAll();
         }
       });
 

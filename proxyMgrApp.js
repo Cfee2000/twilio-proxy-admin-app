@@ -129,7 +129,11 @@ app.post('/createService', (req, res) => {
 async function createService(req, res){
     try{
         let result = await client.proxy.services
-            .create({uniqueName: req.query.uniqueName});
+            .create({
+                uniqueName: req.query.uniqueName,
+                geoMatchLevel: req.query.geoMatchLevel,
+                numberSelectionBehavior: req.query.numberSelectionBehavior
+            });
         res.send(result.sid);
     }catch(err){
         console.log(err);
@@ -154,15 +158,36 @@ app.post('/createSession', (req, res) => {
 });
 
 async function createSession(req, res){
-    try{
-        let result = await client.proxy.services(req.query.serviceSid)
-            .sessions
-            .create({uniqueName: req.query.uniqueName});
-        res.send(result.sid);
-    }catch(err){
-        console.log(err);
-        res.status(err.status).send(err.message);
+    if(req.query.ttl)
+    {
+        try{
+            let result = await client.proxy.services(req.query.serviceSid)
+                .sessions
+                .create({
+                    uniqueName: req.query.uniqueName,
+                    mode: req.query.mode,
+                    ttl: req.query.ttl
+                });
+            res.send(result.sid);
+        }catch(err){
+            console.log(err);
+            res.status(err.status).send(err.message);
+        }        
+    }else{
+        try{
+            let result = await client.proxy.services(req.query.serviceSid)
+                .sessions
+                .create({
+                    uniqueName: req.query.uniqueName,
+                    mode: req.query.mode
+                });
+            res.send(result.sid);
+        }catch(err){
+            console.log(err);
+            res.status(err.status).send(err.message);
+        }
     }
+
 }
 
 app.post('/sessionDelete', (req, res) => {

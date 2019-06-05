@@ -26,51 +26,67 @@
     </ul>
 </div>
 <br>
-<div class="cr-session">
-    <!-- Button HTML (to Trigger Modal) -->
-    <a href="#modalSession" role="button" class="btn btn-lg btn-primary" data-toggle="modal">Quick Create</a>
+<!-- Button HTML (to Trigger Modal) -->
+<a href="#modalSession" role="button" class="btn btn-lg btn-primary" data-toggle="modal">Quick Create</a>
 
-    <!-- Modal HTML -->
-    <div id="modalSession" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create Session</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
+<!-- Modal HTML -->
+<div id="modalSession" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Session</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <form action="#" class="sessionValidation" novalidate="">
                 <div class="modal-body">
-                    <span class="mr-2">Name:</span><input id="uniqueName" type="text"></input>
+                    <label for="uniqueName" class="mr-2">Name:</label>
+                        <input class="form-control" id="uniqueName" type="text" required></input>
+                        <div class="invalid-feedback">
+                            Please provide a Name.
+                        </div>
+                    <label for="mode" class="mr-2 mt-2">Channel Mode:</label>
+                        <select class="form-control" id="mode" required>
+                            <option value="voice-and-message">Voice and SMS</option>
+                            <option value="voice-only">Voice</option>
+                            <option value="message-only">SMS</option>
+                        </select>
+                    <label for="ttl" class="mr-2 mt-2">Time to Live(in Seconds) <i>(optional)</i>:</label>
+                        <input class="form-control" id="ttl"  type="text" pattern="[0-9]{1,6}"></input>
+                        <div class="invalid-feedback">
+                            Please provide a Time to Live.
+                        </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button data-serviceSid="{{serviceSid}}" id="createSession" type="button" class="btn btn-primary">Submit</button>
+                    <button data-serviceSid="{{serviceSid}}" id="createSession" type="submit" class="btn btn-primary">Submit</button>
                 </div>
-                <div id="modal-error" class="mx-4 alert alert-danger" role="alert" style="display:none">
-                    <span id="errorMsgModal"></span>
-                </div>
+            </form>
+            <div id="modal-error" class="mx-4 alert alert-danger" role="alert" style="display:none">
+                <span id="errorMsgModal"></span>
             </div>
         </div>
     </div>
 </div>
-<div class="vw-Assigned">
-    <!-- Modal HTML -->
-    <div id="viewAssigned" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Assigned Participants</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                      
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+
+
+<!-- Modal HTML -->
+<div id="viewAssigned" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assigned Participants</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                    
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
+<br>
 <br>
 <br>
 <h3>Phone Numbers</h3>
@@ -124,6 +140,11 @@
 </div>
 
 <script>
+    $(document).ready(function(){
+        $('#ttl').inputmask({
+            "regex": "[0-9]{1,6}"                        
+        }); //specifying options
+    }); 
     $('#viewAssigned').on('show.bs.modal', function(e) {
         let id = $(e.relatedTarget)[0].id;
         $(`[id^=hidden${id}]`).each((index, element) => {
@@ -193,21 +214,30 @@
         });
     });
 
-    //Script for creating a session
-    let createSession = $('#createSession');
-    let uniqueName = $('#uniqueName');
-    createSession.click(() => {
-        //Need to update this to be a POST and to use AXIOS
-        $.ajax({
-            url: `/createSession?serviceSid=${createSession[0].attributes["data-serviceSid"].value}&uniqueName=${uniqueName[0].value}`,
-            type: 'POST',
-        }).done((data) => {
-            location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
-            //setTimeout(location.reload.bind(location), 8000);
-        }).fail((xhr, status, error) => {
-            $('#modal-error').show();
-            $('#errorMsgModal').text(xhr.responseText);
-        });
+    $('.sessionValidation').submit((event) => {
+        if ($('.sessionValidation')[0].checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+            $('.sessionValidation').addClass('was-validated');
+        }
+        else{
+            $('.sessionValidation').addClass('was-validated');
+            event.preventDefault(); //This is absolutly necessary to prevent Promise Rejection warnings
+            let serviceSid = event.currentTarget.createSession.attributes.getNamedItem("data-serviceSid").value;
+            let uniqueName = event.currentTarget.uniqueName.value;
+            let ttl = event.currentTarget.ttl.value
+            let mode = event.currentTarget.mode.value;
+            $.ajax({
+                url: `/createSession?serviceSid=${serviceSid}&uniqueName=${uniqueName}&ttl=${ttl}&mode=${mode}`,
+                type: 'POST',
+            }).done((data) => {
+                location.reload(); 
+            }).fail((xhr, status, error) => {
+                $('#modal-errorCreate').show();
+                $('#errorMsgCreate').text(xhr.responseText);
+            });         
+        }
+
     });
 
 </script>

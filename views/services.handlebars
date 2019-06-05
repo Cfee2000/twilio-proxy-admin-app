@@ -14,34 +14,51 @@
     {{/each}}
 </ul>
 <br>
-<div class="cr-service">
-    <!-- Button HTML (to Trigger Modal) -->
-    <a href="#modalService" role="button" class="btn btn-lg btn-primary" data-toggle="modal">Quick Create</a>
+<!-- Button HTML (to Trigger Modal) -->
+<a href="#modalService" role="button" class="btn btn-lg btn-primary" data-toggle="modal">Quick Create</a>
 
-    <!-- Modal HTML -->
-    <div id="modalService" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create Service</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
+<!-- Modal HTML -->
+<div id="modalService" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Service</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <form action="#" class="serviceValidation" novalidate="">
                 <div class="modal-body">
-                    <span class="mr-2">Name:</span><input id="uniqueName" type="text"></input>
+                    <label for="uniqueName" class="mr-2">Name:</label>
+                        <input class="form-control" id="uniqueName" type="text" required></input>
+                        <div class="invalid-feedback">
+                            Please provide a Name.
+                        </div>
+                    <label for="geoMatchLevel" class="mr-2 mt-2">Geo Match Level:</label>
+                        <select class="form-control" id="geoMatchLevel" required>
+                            <option value="country">Country</option>
+                            <option value="area-code">Area Code</option>
+                        </select>
+                    <label for="numberSelectionBehavior" class="mr-2 mt-2">Number Selection Behavior:</label>
+                        <select class="form-control" id="numberSelectionBehavior" required>
+                            <option value="prefer-sticky">Prefer Sticky</option>
+                            <option value="avoid-sticky">Avoid Sticky</option>
+                        </select>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button data-serviceName="{{serviceSid}}" id="createService" type="button" class="btn btn-primary">Submit</button>
+                    <button id="createService" type="submit" class="btn btn-primary">Submit</button>
                 </div>
-                <div id="modal-error" class="mx-4 alert alert-danger" role="alert" style="display:none">
-                    <span id="errorMsg"></span>
-                </div>
+            </form>
+            <div id="modal-error" class="mx-4 alert alert-danger" role="alert" style="display:none">
+                <span id="errorMsg"></span>
             </div>
         </div>
     </div>
 </div>
-
+<div id="errorDiv" class="mx-4 alert alert-danger" role="alert" style="display:none">
+    <span id="errorMsgMain"></span>
+</div>
 <script>
+
     $(`[id^=delService]`).click((event) => {
         let serviceSid = event.currentTarget.attributes.getNamedItem("data-serviceSid").value;
 
@@ -57,20 +74,29 @@
         });
     });
 
-    let element = $('#createService');
-    let uniqueName = $('#uniqueName');
-    element.click(() => {
-        //Need to update this to be a POST and to use AXIOS
-        $.ajax({
-            url: `/createService?uniqueName=${uniqueName[0].value}`,
-            type: 'POST',
-        }).done((data) => {
-            location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
-            //setTimeout(location.reload.bind(location), 8000);
-        }).fail((xhr, status, error) => {
-            $('#modal-error').show();
-            $('#errorMsg').text(xhr.responseText);
-        });
+    $('.serviceValidation').submit((event) => {
+        if ($('.serviceValidation')[0].checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+            $('.serviceValidation').addClass('was-validated');
+        }
+        else{
+            $('.serviceValidation').addClass('was-validated');
+            event.preventDefault(); //This is absolutly necessary to prevent Promise Rejection warnings
+            let uniqueName = event.currentTarget.uniqueName.value;
+            let geoMatchLevel = event.currentTarget.geoMatchLevel.value
+            let numberSelectionBehavior = event.currentTarget.numberSelectionBehavior.value;
+            $.ajax({
+                url: `/createService?uniqueName=${uniqueName}&geoMatchLevel=${geoMatchLevel}&numberSelectionBehavior=${numberSelectionBehavior}`,
+                type: 'POST',
+            }).done((data) => {
+                location.reload(); 
+            }).fail((xhr, status, error) => {
+                $('#modal-errorCreate').show();
+                $('#errorMsgCreate').text(xhr.responseText);
+            });         
+        }
+
     });
 </script>
 
