@@ -38,6 +38,8 @@ Click to call setup is mandatory, so please follow the steps below: <br>
 ```Step 3:``` Create an [API Key](https://www.twilio.com/console/runtime/api-keys) and copy the Key SID and Key Secret and assign to variables API_KEY and API_SECRET respectively in your .env file. *Note: Start with the Key Secret first as you only get one chance to view the secret*<br>
 ```Step 4:``` Copy the Application SID from the TwiML App and assigned it to variable PROXY_TWIML_APP_SID in your .env file.<br>
 
+**IMPORTANT! - If you have not already done so, you will have to setup a [Verified Caller ID](https://www.twilio.com/console/phone-numbers/verified) if you wish to dial from a non-Twilio number**
+
 ## Call Recording Setup (optional)
 
 Embedded in this app is also an HTTP GET route "recordCall" for handling recording of Proxy voice calls. Call recording is not yet natively supported in the Twilio Proxy API, so the functionality here uses the Twilio Recording API in conjunction with Proxy.
