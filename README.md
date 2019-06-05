@@ -30,7 +30,15 @@ npm install -S axios, express, twilio, express-handlebars, dotenv
 
 Optionally, you can install packages like nodemon if you want changes to be published instantly
 
-## Call Recording Setup
+## Click to Call Setup
+
+Click to call setup is mandatory, so please follow the steps below: <br> 
+```Step 1:``` Create a [TwiML App](https://www.twilio.com/console/voice/twiml/apps) and set the Voice "Request URL" to your publically accessible endpoint with route "proxyDemoOutboundDial" ```(ie. http://XXXXXX.ngrok.io/proxyDemoOutboundDial```.<br> 
+```Step 2:``` Copy the Application SID from the TwiML App and assigned it to variable PROXY_TWIML_APP_SID in your .env file.<br>
+```Step 3:``` Create an [API Key](https://www.twilio.com/console/runtime/api-keys) and copy the Key SID and Key Secret and assign to variables API_KEY and API_SECRET respectively in your .env file. *Note: Start with the Key Secret first as you only get one chance to view the secret*<br>
+```Step 4:``` Copy the Application SID from the TwiML App and assigned it to variable PROXY_TWIML_APP_SID in your .env file.<br>
+
+## Call Recording Setup (optional)
 
 Embedded in this app is also an HTTP GET route "recordCall" for handling recording of Proxy voice calls. Call recording is not yet natively supported in the Twilio Proxy API, so the functionality here uses the Twilio Recording API in conjunction with Proxy.
 
@@ -87,6 +95,8 @@ The Participants page shows each participant currently assigned to the given Ses
 Particpants can be deleted with the "Delete" button.
 
 There is also a "Quick Create" button that allows you to create a Participant. You must specify a Friendly Name and Participant Phone # to create a Participant. Optionally, you can specify a Proxy # to assign directly to the Participant (rather than letting the Proxy Service choose from your pool of numbers).
+
+If 2 Participants exist at any time for a particular Session, the UI will enable a "Dial" button that can be used for click-to-call from one participant to the other. The dialing participant will always be the participant you clicked the "Dial" button for, and the receiving participant will always be the adjacent participant. A JWT Access Token is generated for each time you click the "Dial" button. If the token generation was successful, a modal window will confirm you want to click-to-call. Pressing "Place Call" from the modal window will place the call. This will toggle the "Hangup Call" button to force terminate the call from the browser if desired.
 
 
 ## Interactions Page
