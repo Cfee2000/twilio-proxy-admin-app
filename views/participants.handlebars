@@ -162,7 +162,8 @@
         }).done((data) => {
             $('#initiateDial').attr('data-participantPhone', `${participantPhone}`);
             $('#initiateDial').attr('data-proxyPhone', `${proxyPhone}`);
-            $('#JWT').text(data); //Only for Demo purposes. Need to securely store token for prduction code
+            //$('#JWT').text(data); //Only for Demo purposes. Need to securely store token for prduction code
+            sessionStorage.setItem('accessToken', data);
             $('#modal-successDial').show();
             $('#successMsgDial').text("JWT Token Generated Successfully");
         }).fail((xhr, status, error) => {
@@ -178,7 +179,8 @@
     $('#initiateDial').click((event) => {
         let participantPhone = event.currentTarget.attributes.getNamedItem("data-participantPhone").value;
         let proxyPhone = event.currentTarget.attributes.getNamedItem("data-proxyPhone").value;
-        let token = $('#JWT').text();
+        //let token = $('#JWT').text();
+        let token = sessionStorage.getItem('accessToken');
 
         // Setup Twilio.Device
         device = new Twilio.Device(token, {

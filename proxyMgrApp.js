@@ -91,7 +91,7 @@ app.post('/proxyAccessToken', (req, res) => {
         let JWT = token.toJwt();
         // Serialize the token to a JWT string
         console.log(JWT);
-        res.send(JWT)
+        res.send(JWT);
 
     }catch(err){
         if(err.status)
