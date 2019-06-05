@@ -42,24 +42,20 @@
 </div>
 
 <script>
-    let i = 0;
-    while($(`#delService${i}`).length)
-    {
-        let element = $(`#delService${i}`);
-        element.click(() => {
-            $.ajax({
-                url: `/serviceDelete?serviceSid=${element[0].attributes["data-serviceSid"].value}`,
-                type: 'POST',
-            }).done((data) => {
-                location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
-                //setTimeout(location.reload.bind(location), 8000);
-            }).fail((xhr, status, error) => {
-                $('#modal-error').show();
-                $('#errorMsg').text(xhr.responseText);
-            });
+    $(`[id^=delService]`).click((event) => {
+        let serviceSid = event.currentTarget.attributes.getNamedItem("data-serviceSid").value;
+
+        $.ajax({
+            url: `/serviceDelete?serviceSid=${serviceSid}`,
+            type: 'POST',
+        }).done((data) => {
+            location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
+            //setTimeout(location.reload.bind(location), 8000);
+        }).fail((xhr, status, error) => {
+            $('#errorDiv').show();
+            $('#errorMsgMain').text(xhr.responseText);
         });
-        i++;
-    }
+    });
 
     let element = $('#createService');
     let uniqueName = $('#uniqueName');

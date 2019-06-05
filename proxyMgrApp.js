@@ -1,10 +1,18 @@
 const express = require('express');
 const axios = require('axios');
 const exphbs = require('express-handlebars');
+const VoiceResponse = require('twilio').twiml.VoiceResponse;
+const AccessToken = require('twilio').jwt.AccessToken;
+const VoiceGrant = AccessToken.VoiceGrant;
 
 require('dotenv').config();
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
+const proxyAPIKey = process.env.API_KEY;
+const proxyAPISecret = process.env.API_SECRET;
+
+const outgoingApplicationSid = process.env.PROXY_TWIML_APP_SID;
+
 const client = require('twilio')(accountSid, authToken);
 
 const app = express();
@@ -55,6 +63,45 @@ app.use(express.urlencoded({ extended: false }));
 
 app.get('/', (req, res) => {
     res.render('index');
+});
+
+app.post('/proxyDemoOutboundDial', (req, res) => {
+    let twiml = new VoiceResponse();
+    const dial = twiml.dial({
+        callerId: req.body.From
+    });
+    dial.number(req.body.To);
+
+    res.type('text/xml');
+    res.send(twiml.toString());
+});
+
+
+app.post('/proxyAccessToken', (req, res) => {
+    try{
+        const identity = 'user';
+
+        const voiceGrant = new VoiceGrant({
+            outgoingApplicationSid: outgoingApplicationSid
+        });
+        const token = new AccessToken(accountSid, proxyAPIKey, proxyAPISecret);
+        token.addGrant(voiceGrant);
+        token.identity = identity;
+
+        let JWT = token.toJwt();
+        // Serialize the token to a JWT string
+        console.log(JWT);
+        res.send(JWT)
+
+    }catch(err){
+        if(err.status)
+        {
+            res.status(err.status).send(err.message);
+        }
+        else{
+            res.status("400").send(err.message);
+        }
+    }
 });
 
 app.use(express.static(__dirname)); //loads all files from current directory
@@ -163,16 +210,31 @@ app.post('/createParticipant', (req, res) => {
 });
 
 async function createParticipant(req, res){
-    try{
-        let result = await client.proxy.services(req.query.serviceSid)
-            .sessions(req.query.sessionSid)
-            .participants
-            .create({friendlyName: req.query.friendlyName, identifier: "+" + req.query.identifier, proxyIdentifier: "+" + req.query.proxyIdentifier});
-        res.send(result.sid);
-    }catch(err){
-        console.log(err);
-        res.status(err.status).send(err.message);
+    if(req.query.proxyIdentifier)
+    {
+        try{
+            let result = await client.proxy.services(req.query.serviceSid)
+                .sessions(req.query.sessionSid)
+                .participants
+                .create({friendlyName: req.query.friendlyName, identifier: "+" + req.query.identifier, proxyIdentifier: "+" + req.query.proxyIdentifier});
+            res.send(result.sid);
+        }catch(err){
+            console.log(err);
+            res.status(err.status).send(err.message);
+        }
+    }else{
+        try{
+            let result = await client.proxy.services(req.query.serviceSid)
+                .sessions(req.query.sessionSid)
+                .participants
+                .create({friendlyName: req.query.friendlyName, identifier: "+" + req.query.identifier});
+            res.send(result.sid);
+        }catch(err){
+            console.log(err);
+            res.status(err.status).send(err.message);
+        }
     }
+
 }
 
 app.post('/participantDelete', (req, res) => {

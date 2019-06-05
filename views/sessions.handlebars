@@ -143,70 +143,55 @@
         $('.modal-body').empty();
     });
 
-    let i = 0;
-    while($(`#countPart${i}`).length)
-    {
-        i++;
-    }
-    for(j = 0; j <= i; j++)
-    {
-        if($(`#reserve${j}`).length)
-        {
-            let element = $(`#reserve${j}`);
-            element.click(() => {
-                $.ajax({
-                    url: `/reservePhone?serviceSid=${element[0].attributes["data-serviceSid"].value}&phoneSid=${element[0].attributes["data-phoneSid"].value}&isReserved=${element[0].attributes["data-isReserved"].value}`,
-                    type: 'POST',
-                }).done((data) => {
-                    location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
-                    //setTimeout(location.reload.bind(location), 8000);
-                }).fail((xhr, status, error) => {
-                    $('#errorDiv').show();
-                    $('#errorMsgMain').text(xhr.responseText);
-                });
-            });        
-        }
-    }
-    
-    //Script for deleting a session
-    let delCounter = 0;
-    while($(`#delSession${delCounter}`).length)
-    {
-        let delSession = $(`#delSession${delCounter}`);
-        delSession.click(() => {
-            $.ajax({
-                url: `/sessionDelete?serviceSid=${delSession[0].attributes["data-serviceSid"].value}&sessionSid=${delSession[0].attributes["data-sessionSid"].value}`,
-                type: 'POST',
-            }).done((data) => {
-                location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
-                //setTimeout(location.reload.bind(location), 8000);
-            }).fail((xhr, status, error) => {
-                $('#errorDiv').show();
-                $('#errorMsgMain').text(xhr.responseText);
-            });
-        });
-        delCounter++;
-    }
+    $(`[id^=reserve]`).click((event) => {
+        let phoneSid = event.currentTarget.attributes.getNamedItem("data-phoneSid").value;
+        let serviceSid = event.currentTarget.attributes.getNamedItem("data-serviceSid").value;
+        let isReserved = event.currentTarget.attributes.getNamedItem("data-isReserved").value;
 
-    //Script for updating a session
-    let updateCounter = 0;
-    while($(`#updateSession${updateCounter}`).length)
-    {
-        let updateSession = $(`#updateSession${updateCounter}`);
-        updateSession.click(() => {
-            $.ajax({
-                url: `/sessionUpdate?serviceSid=${updateSession[0].attributes["data-serviceSid"].value}&sessionSid=${updateSession[0].attributes["data-sessionSid"].value}&updateStatus=${updateSession[0].attributes["data-sessionUpdate"].value}`,
-                type: 'POST',
-            }).done((data) => {
-                location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
-                //setTimeout(location.reload.bind(location), 8000);
-            }).fail((xhr, status, error) => {
-                $('#errorDiv').show();
-                $('#errorMsgMain').text(xhr.responseText);
-            });
+        $.ajax({
+            url: `/reservePhone?serviceSid=${serviceSid}&phoneSid=${phoneSid}&isReserved=${isReserved}`,
+            type: 'POST',
+        }).done((data) => {
+            location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
+            //setTimeout(location.reload.bind(location), 8000);
+        }).fail((xhr, status, error) => {
+            $('#errorDiv').show();
+            $('#errorMsgMain').text(xhr.responseText);
         });
-        updateCounter++;
-    }
+    });
+
+    $(`[id^=delSession]`).click((event) => {
+        let sessionSid = event.currentTarget.attributes.getNamedItem("data-sessionSid").value;
+        let serviceSid = event.currentTarget.attributes.getNamedItem("data-serviceSid").value;
+
+        $.ajax({
+            url: `/sessionDelete?serviceSid=${serviceSid}&sessionSid=${sessionSid}`,
+            type: 'POST',
+        }).done((data) => {
+            location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
+            //setTimeout(location.reload.bind(location), 8000);
+        }).fail((xhr, status, error) => {
+            $('#errorDiv').show();
+            $('#errorMsgMain').text(xhr.responseText);
+        });
+    });
+
+    $(`[id^=updateSession]`).click((event) => {
+        let sessionSid = event.currentTarget.attributes.getNamedItem("data-sessionSid").value;
+        let serviceSid = event.currentTarget.attributes.getNamedItem("data-serviceSid").value;
+        let updateStatus = event.currentTarget.attributes.getNamedItem("data-sessionUpdate").value;
+
+        $.ajax({
+            url: `/sessionUpdate?serviceSid=${serviceSid}&sessionSid=${sessionSid}&updateStatus=${updateStatus}`,
+            type: 'POST',
+        }).done((data) => {
+            location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
+            //setTimeout(location.reload.bind(location), 8000);
+        }).fail((xhr, status, error) => {
+            $('#errorDiv').show();
+            $('#errorMsgMain').text(xhr.responseText);
+        });
+    });
 
     //Script for creating a session
     let createSession = $('#createSession');

@@ -16,7 +16,9 @@
         <span class="ml ml-2">Proxy # ({{this.proxyIdentifier}})</span>
 
         <button data-participantSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" data-sessionSid="{{sessionSid}}" id="del{{@index}}" class="btn btn-danger float-right">Delete</button>
-        {{!-- <button class="btn btn-success float-right mr mr-4">Dial</button> --}}
+        {{#ifCond ../participants.length ">" 1}}
+            <a href="#modalCall" data-participantPhone="{{this.identifier}}" data-proxyPhone="{{this.proxyIdentifier}}" id="dial{{@index}}" role="button" class="mr-4 btn btn-success float-right" data-toggle="modal" >Dial</a>
+        {{/ifCond}}
     </li>
     {{/each}}
 </ul>
@@ -64,14 +66,37 @@
             </div>
         </div>
     </div>
+        <div id="modalCall" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Initiate Call</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to place a proxy call?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button data-participantPhone="" id="initiateDial" type="button" class="btn btn-primary">Place Call</button>
+                        <button id="hangupCall" type="button" class="btn btn-danger" style="display: none">Hangup Call</button>
+                    </div>
+                <div id="modal-errorDial" class="mx-4 alert alert-danger" role="alert" style="display:none">
+                    <p id="errorMsgDial"></p>
+                </div>
+                <div id="modal-successDial" class="mx-4 alert alert-success" role="alert" style="display:none">
+                    <p id="successMsgDial"></p>
+                </div>                
+            </div>
+        </div>
+    </div>
 <br>
-
+<span hidden id="JWT"></span>
 <div id="errorDiv" class="mx-4 alert alert-danger" role="alert" style="display:none">
     <span id="errorMsgMain"></span>
 </div>
 
 <script>
-
     $(document).ready(function(){
         $('#identifier, #proxyIdentifier').inputmask({
             "regex": "^\\+?[1-9]\\d{4,14}$"
@@ -81,26 +106,23 @@
                                 {{!-- "regex": "^(?:(?:\\+?1\\s*(?:[.-]\\s*)?)?(?:\\(\\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\\s*\\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\\s*(?:[.-]\\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\\s*(?:[.-]\\s*)?([0-9]{4})(?:\\s*(?:#|x\\.?|ext\\.?|extension)\\s*(\\d+))?$" --}}
         }); //specifying options
     });
-    let i = 0;
-    let id = `del${i}`;
-    while(document.getElementById(id) !== null)
-    {
-        let element = document.getElementById(id);
-        element.addEventListener('click', () => {
-            $.ajax({
-                url: `/participantDelete?serviceSid=${element.attributes["data-serviceSid"].value}&sessionSid=${element.attributes["data-sessionSid"].value}&participantSid=${element.attributes["data-participantSid"].value}`,
-                type: 'POST',
-            }).done((data) => {
-                location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
-                //setTimeout(location.reload.bind(location), 8000);
-            }).fail((xhr, status, error) => {
-                $('#errorDiv').show();
-                $('#errorMsgMain').text(xhr.responseText);
-            });
+
+    $(`[id^=del]`).click((event) => {
+        let participantSid = event.currentTarget.attributes.getNamedItem("data-participantSid").value;
+        let serviceSid = event.currentTarget.attributes.getNamedItem("data-serviceSid").value;
+        let sessionSid = event.currentTarget.attributes.getNamedItem("data-sessionSid").value;
+
+        $.ajax({
+            url: `/participantDelete?serviceSid=${serviceSid}&sessionSid=${sessionSid}&participantSid=${participantSid}`,
+            type: 'POST',
+        }).done((data) => {
+            location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
+            //setTimeout(location.reload.bind(location), 8000);
+        }).fail((xhr, status, error) => {
+            $('#errorDiv').show();
+            $('#errorMsgMain').text(xhr.responseText);
         });
-        i++;
-        id = `del${i}`;
-    }
+    });
 
     $('.needs-validation').submit((event) => {
         if ($('.needs-validation')[0].checkValidity() === false) {
@@ -130,6 +152,87 @@
         }
 
     });
+
+    $('#modalCall').on('show.bs.modal', function(event) {
+        let participantPhone = event.relatedTarget.dataset.participantphone;
+        let proxyPhone = event.relatedTarget.dataset.proxyphone;
+        $.ajax({
+            url: `/proxyAccessToken`,
+            type: 'POST',
+        }).done((data) => {
+            $('#initiateDial').attr('data-participantPhone', `${participantPhone}`);
+            $('#initiateDial').attr('data-proxyPhone', `${proxyPhone}`);
+            $('#JWT').text(data); //Only for Demo purposes. Need to securely store token for prduction code
+            $('#modal-successDial').show();
+            $('#successMsgDial').text("JWT Token Generated Successfully");
+        }).fail((xhr, status, error) => {
+            $('#JWT').empty(); //clear token value
+            $('#errorMsgMain').text(xhr.responseText);
+            $('#modalCall').hide();
+        })
+    });
+    $('#modalCall').on('hide.bs.modal', function(e) {
+   
+    });
+
+    $('#initiateDial').click((event) => {
+        let participantPhone = event.currentTarget.attributes.getNamedItem("data-participantPhone").value;
+        let proxyPhone = event.currentTarget.attributes.getNamedItem("data-proxyPhone").value;
+        let token = $('#JWT').text();
+
+        // Setup Twilio.Device
+        device = new Twilio.Device(token, {
+        // Set Opus as our preferred codec. Opus generally performs better, requiring less bandwidth and
+        // providing better audio quality in restrained network conditions. Opus will be default in 2.0.
+        codecPreferences: ['opus', 'pcmu'],
+        // Use fake DTMF tones client-side. Real tones are still sent to the other end of the call,
+        // but the client-side DTMF tones are fake. This prevents the local mic capturing the DTMF tone
+        // a second time and sending the tone twice. This will be default in 2.0.
+        fakeLocalDTMF: true,
+      });
+
+      device.on('ready',function (device) {
+        console.log('Twilio.Device Ready!');
+        var params = {
+            To: proxyPhone,
+            From: participantPhone
+        };
+
+        if(device){
+            device.connect(params);
+        }
+      });
+
+    $('#hangupCall').click((event) => {
+        if (device) {
+        device.disconnectAll();
+        }
+      });
+
+      device.on('error', function (error) {
+        console.log('Twilio.Device Error: ' + error.message);
+        $('#modal-errorCreate').show();
+        $('#errorMsgCreate').text(error.message);
+        if (device) {
+            device.disconnectAll();
+        }
+      });
+
+      device.on('connect', function (conn) {
+        console.log('Successfully established call!');
+        document.getElementById('initiateDial').style.display = 'none';
+        document.getElementById('hangupCall').style.display = 'inline';
+        //volumeIndicators.style.display = 'block';
+        //bindVolumeIndicators(conn);
+      });
+
+      device.on('disconnect', function (conn) {
+        console.log('Call ended.');
+        document.getElementById('initiateDial').style.display = 'inline';
+        document.getElementById('hangupCall').style.display = 'none';
+        //volumeIndicators.style.display = 'none';
+      });
+    })
 
 </script>
 
