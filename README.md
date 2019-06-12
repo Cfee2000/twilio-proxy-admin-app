@@ -1,15 +1,16 @@
 # LEGAL DISCLAIMER
 
-Notice: This information is not legal advice, and Twilio recommends that you consult with your legal counsel to make sure that you are complying with all applicable laws in connection with calls you transmit and receive using Twilio. Ultimately, you are responsible for ensuring that your use of Twilio complies with all applicable laws and regulations. Please also refer to our [**Terms of Service**](https://www.twilio.com/legal/tos>) and [**Acceptable Use Policy**](https://www.twilio.com/legal/aup) for more information. 
+Notice: This app and the information contained herein is not legal advice, and Twilio recommends that you consult with your legal counsel to make sure that you are complying with all applicable laws in connection with calls you transmit and receive using Twilio. Ultimately, you are responsible for ensuring that your use of Twilio complies with all applicable laws and regulations. Please also refer to our [**Terms of Service**](https://www.twilio.com/legal/tos>) and [**Acceptable Use Policy**](https://www.twilio.com/legal/aup) for more information. 
 
 Please see here: [**Legal Considerations**](https://support.twilio.com/hc/en-us/articles/360011522553-Legal-Considerations-with-Recording-Voice-and-Video-Communications) for more on recording voice communications with Twilio, and [**Voice Recording Encryption**](https://www.twilio.com/blog/voice-recording-encryption-generally-available) for more on encrypting voice recordings.
 
 
 # Twilio Proxy Admin App
 
-This is a Twilio Proxy administrative application that facilitates the ability to **manage Participants and display Participant Interactions as part of a Proxy Session, as well as link to call recordings tied to a Proxy Interaction** *(Note -- though not supported natively by Proxy, call recording funtionality is embedded in this app by way of the Recording API - (see [CallRecordingSetup](#call-recording-setup))* - Currently, the Twilio Console does not have a way to manage Proxy Participants through the UI. **This app intends to fill that gap in as basic and intuitive a way as possible.** The app also provides simple constructs for managing Services, Sessions, and Phone Numbers as well, each intended to provide a greater contexual focus around Participants.
+This is a Twilio Proxy administrative application that facilitates the ability to **manage Participants and display Participant Interactions as part of a Proxy Session, as well as link to call recordings tied to a Proxy Interaction** *(Note -- though not supported natively by Proxy, call recording funtionality is embedded in this app by way of the Recording API.* Currently, the Twilio Console does not have a way to manage Proxy Participants through the UI. **This app intends to fill that gap in as basic and intuitive a way as possible.** The app also provides simple constructs for managing Services, Sessions, and Phone Numbers as well, each intended to provide a greater contexual focus around Participant Management.
 
-This app uses Node Express as the backend and Handlebars https://handlebarsjs.com/ as the UI Templating Engine
+This app uses [Node Express](https://expressjs.com/) as the web app framework, [Bootstrap](https://getbootstrap.com/) for the UI and [Handlebars](https://handlebarsjs.com/) for the UI Templating Engine. It also utilizes JS CDN's for [Popper](https://popper.js.org/) - which I believe is wrapped by Bootstrap as a dependency for modal windows - a custom Jquery library called [InputMask](https://github.com/RobinHerbots/Inputmask) for phone number masking, and Twilio Client 1.7 w/ Opus Codec for leveraging outbound click-to-call functionality.
+
 
 ## Prerequisites
 
@@ -37,6 +38,7 @@ Click to call setup is now OPTIONAL. Please follow the steps below to enable (*N
 ```Step 2:``` Copy the Application SID from the TwiML App and assign it to variable PROXY_TWIML_APP_SID in your .env file.<br>
 ```Step 3:``` Create an [API Key](https://www.twilio.com/console/runtime/api-keys) and copy the Key SID and Key Secret and assign to variables API_KEY and API_SECRET respectively in your .env file. *Note: Start with the Key Secret first as you only get one chance to view the secret*<br>
 ```Step 4:``` Copy the Application SID from the TwiML App and assigned it to variable PROXY_TWIML_APP_SID in your .env file.<br>
+**IMPORTANT! - If you have not already done so, you will have to setup a [Verified Caller ID](https://www.twilio.com/console/phone-numbers/verified) if you wish to dial from a non-Twilio number**
 
 ## Chat Setup (optional)
 
@@ -47,6 +49,7 @@ Please follow the steps below to enable (*Note you will need to uncomment the CH
 ```Step 4:``` Use the [API Explorer Chat Create](https://www.twilio.com/console/runtime/api-explorer/chat/chat-channels/create) to create a Chat Channel for your Chat Service. The Chat Service SID is required. Copy the Chat Channel SID from the output of the create operation.<br>
 ```Step 5:``` Back in the app, create a Proxy Session and a Proxy Participant within that session that is a 'Chat' participant. On creating the 'Chat' participant, you MUST use the value of the Chat Channel SID from Step 4 as the "Chat Channel SID" on creating the chat participant.<br>
 ```Step 6:``` Use the [API Explorer Chat Update](https://www.twilio.com/console/runtime/api-explorer/chat/chat-channels/update) this time to MODIFY the Chat Channel for your Chat Service. **It is essential that you add the following to the Attributes optional field to ensure the Chat communications can be sent to SMS ```{"serviceNumber":[Whatever you want],"twilioNumber":[Proxy # for your Chat Channel Participant],"from":[Actual Phone Number that will recieve the SMS],"forwarding": true, "proxySession": [The proxy session associated with your Chat Channel Participant]} ```**<br>
+
 
 ## Call Recording Setup (optional)
 
@@ -116,11 +119,18 @@ Each Interaction for the given Participant is shown on the Interactions page, wi
 ## PII
 Note that when creating a new Participant, the "Friendly Name" you provide in the modal window should not include a participants real name. See https://www.twilio.com/docs/proxy/api/participant#create-a-participant-resource and https://www.twilio.com/docs/glossary/what-is-personally-identifiable-information-pii#pii-fields. 
 
+## Data Storage
+This app relies on local and session storage. You are resposible for your own data and your customers data. Please refer to our [**Terms of Service**](https://www.twilio.com/legal/tos>) and [**Acceptable Use Policy**](https://www.twilio.com/legal/aup) for more information.  
+
 ## Authors
 
 * **Chris Feehan** - [Twilio]
 
 See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+
+
+## Musings
+
 
 ## License
 
