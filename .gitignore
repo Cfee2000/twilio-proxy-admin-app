@@ -13,3 +13,4 @@ package.json
 
 #misc
 /.DS_Store
+server*

@@ -63,7 +63,10 @@
         let serviceSid = event.currentTarget.attributes.getNamedItem("data-serviceSid").value;
 
         $.ajax({
-            url: `/serviceDelete?serviceSid=${serviceSid}`,
+            url: `/serviceDelete`,
+            data: {
+                serviceSid: serviceSid
+            },
             type: 'POST',
         }).done((data) => {
             location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
@@ -87,7 +90,12 @@
             let geoMatchLevel = event.currentTarget.geoMatchLevel.value
             let numberSelectionBehavior = event.currentTarget.numberSelectionBehavior.value;
             $.ajax({
-                url: `/createService?uniqueName=${uniqueName}&geoMatchLevel=${geoMatchLevel}&numberSelectionBehavior=${numberSelectionBehavior}`,
+                url: `/createService`,
+                data: {
+                    uniqueName: uniqueName,
+                    geoMatchLevel: geoMatchLevel,
+                    numberSelectionBehavior: numberSelectionBehavior
+                },
                 type: 'POST',
             }).done((data) => {
                 location.reload(); 

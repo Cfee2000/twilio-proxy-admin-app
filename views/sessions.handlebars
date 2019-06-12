@@ -12,12 +12,12 @@
         {{#each sessions}}
             {{#ifCond this.status "==" "closed"}}
             <li class="mb-2 border border-warning rounded list-group-item">
-                <a href="/participants?sessionSid={{this.sid}}&serviceSid={{serviceSid}}">{{this.uniqueName}}</a>
+                <a href="/participants?sessionSid={{this.sid}}&serviceSid={{serviceSid}}&sessionMode={{this.mode}}&sessionStatus={{this.status}}">{{this.uniqueName}}</a>
                 <button data-sessionSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" id="delSession{{@index}}" class="btn btn-danger float-right">Delete</button>
                 <button data-sessionUpdate="closed" data-sessionSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" id="updateSession{{@index}}" class="mr-4 btn btn-success float-right">Open</button>
             {{else}} 
             <li class="mb-2 border border-success rounded list-group-item">
-                <a href="/participants?sessionSid={{this.sid}}&serviceSid={{serviceSid}}">{{this.uniqueName}}</a>
+                <a href="/participants?sessionSid={{this.sid}}&serviceSid={{serviceSid}}&sessionMode={{this.mode}}&sessionStatus={{this.status}}">{{this.uniqueName}}</a>
                 <button data-sessionSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" id="delSession{{@index}}" class="btn btn-danger float-right">Delete</button>
                 <button data-sessionUpdate="notClosed" data-sessionSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" id="updateSession{{@index}}" class="mr-4 btn btn-warning float-right">Close</button>
             {{/ifCond}}
@@ -133,7 +133,7 @@
     {{/each}}
 </ul>
 <br>
-<a target="_blank" class="btn btn-lg btn-primary" href="https://www.twilio.com/console/proxy/services/{{serviceSid}}/proxy_numbers" role="button">Add Phone Numbers</a></button>
+<a target="_blank" class="btn btn-lg btn-primary" href="https://www.twilio.com/console/proxy/services/{{serviceSid}}/proxy_numbers" role="button">Manage Phone Numbers</a></button>
 <br>
 <div id="errorDiv" class="mx-4 alert alert-danger" role="alert" style="display:none">
     <span id="errorMsgMain"></span>
@@ -170,7 +170,12 @@
         let isReserved = event.currentTarget.attributes.getNamedItem("data-isReserved").value;
 
         $.ajax({
-            url: `/reservePhone?serviceSid=${serviceSid}&phoneSid=${phoneSid}&isReserved=${isReserved}`,
+            url: `/reservePhone`,
+            data: {
+                serviceSid: serviceSid,
+                phoneSid: phoneSid,
+                isReserved: isReserved
+            },
             type: 'POST',
         }).done((data) => {
             location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
@@ -186,7 +191,11 @@
         let serviceSid = event.currentTarget.attributes.getNamedItem("data-serviceSid").value;
 
         $.ajax({
-            url: `/sessionDelete?serviceSid=${serviceSid}&sessionSid=${sessionSid}`,
+            url: `/sessionDelete`,
+            data: {
+                serviceSid: serviceSid,
+                sessionSid: sessionSid
+            },
             type: 'POST',
         }).done((data) => {
             location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
@@ -203,7 +212,12 @@
         let updateStatus = event.currentTarget.attributes.getNamedItem("data-sessionUpdate").value;
 
         $.ajax({
-            url: `/sessionUpdate?serviceSid=${serviceSid}&sessionSid=${sessionSid}&updateStatus=${updateStatus}`,
+            url: `/sessionUpdate`,
+            data: {
+                serviceSid: serviceSid,
+                sessionSid: sessionSid,
+                updateStatus: updateStatus
+            },
             type: 'POST',
         }).done((data) => {
             location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
@@ -228,7 +242,13 @@
             let ttl = event.currentTarget.ttl.value
             let mode = event.currentTarget.mode.value;
             $.ajax({
-                url: `/createSession?serviceSid=${serviceSid}&uniqueName=${uniqueName}&ttl=${ttl}&mode=${mode}`,
+                url: `/createSession`,
+                data: {
+                    serviceSid: serviceSid,
+                    uniqueName: uniqueName,
+                    ttl: ttl,
+                    mode: mode
+                },
                 type: 'POST',
             }).done((data) => {
                 location.reload(); 

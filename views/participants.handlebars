@@ -12,20 +12,26 @@
     <li class="mb-2 rounded list-group-item">
         
         <span><a href="/interactions?sessionSid={{sessionSid}}&serviceSid={{serviceSid}}&participantName={{this.friendlyName}}&participantSid={{this.sid}}&participantPhone={{this.identifier}}&participantProxyNum={{this.proxyIdentifier}}">{{this.friendlyName}}</a>  ({{this.sid}})</span><br>
+        {{!-- <span><a id="interactions" data-participantName={{this.friendlyName}} data-participantSid={{this.sid}} data-participantPhone={{this.identifier}} data-participantProxyNum={{this.proxyIdentifier}} data-sessionSid={{sessionSid}} data-serviceSid={{serviceSid}} href="#">{{this.friendlyName}}</a>  ({{this.sid}})</span><br> --}}
         <span class="ml ml-2">Participant # ({{this.identifier}})</span>
         <span class="ml ml-2">Proxy # ({{this.proxyIdentifier}})</span>
 
         <button data-participantSid="{{this.sid}}" data-serviceSid="{{serviceSid}}" data-sessionSid="{{sessionSid}}" id="del{{@index}}" class="btn btn-danger float-right">Delete</button>
-        {{#ifCond ../participants.length ">" 1}}
-            <a href="#modalCall" data-participantPhone="{{this.identifier}}" data-proxyPhone="{{this.proxyIdentifier}}" id="dial{{@index}}" role="button" class="mr-4 btn btn-success float-right" data-toggle="modal" >Dial</a>
-        {{/ifCond}}
+            {{#ifCond ../participants.length ">" 1}}
+                    <a href="#modalCall" data-sessionMode="{{../sessionMode}}" data-sessionStatus="{{../sessionStatus}}" data-participantPhone="{{this.identifier}}" data-proxyPhone="{{this.proxyIdentifier}}" id="dial{{@index}}" role="button" class="mr-4 btn btn-success float-right" data-toggle="modal" >Dial</a>
+                    <a href="#modalSMS" data-sessionMode="{{../sessionMode}}" data-sessionStatus="{{../sessionStatus}}"  data-participantPhone="{{this.identifier}}" data-proxyPhone="{{this.proxyIdentifier}}" id="sms{{@index}}" role="button" class="mr-4 btn btn-success float-right" data-toggle="modal" >Send SMS</a>
+                    {{#ifCond this.identifier.length "==" 34}}
+                        <a href="#modalChat" data-sessionMode="{{../sessionMode}}" data-sessionStatus="{{../sessionStatus}}"  data-participantPhone="{{this.identifier}}" data-proxyPhone="{{this.proxyIdentifier}}" id="chat{{@index}}" role="button" class="mr-4 btn btn-success float-right" data-toggle="modal" >Start a Chat</a>
+                    {{/ifCond}}
+            {{/ifCond}}
     </li>
     {{/each}}
 </ul>
 <br>
 
 <!-- Button HTML (to Trigger Modal) -->
-<a href="#modalParticipant" role="button" class="mr-4 btn btn-lg btn-primary" data-toggle="modal">Quick Create</a>
+<a href="#modalParticipant" role="button" class="mr-4 btn btn-lg btn-primary" data-toggle="modal">Create Participant</a>
+<a href="#modalChatParticipant" role="button" class="mr-4 btn btn-lg btn-primary" data-toggle="modal">Create Chat Participant</a>
 
 <!-- Modal HTML -->
 
@@ -66,7 +72,43 @@
             </div>
         </div>
     </div>
-        <div id="modalCall" class="modal fade" tabindex="-1">
+    <div id="modalChatParticipant" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Chat Participant</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <form action="#" class="participantChatValidation" novalidate="">
+                    <div class="modal-body">
+                        <label for="friendlyName" class="mr-2">Chat User Name:</label>
+                            <input class="form-control" id="chatName" type="text" required></input>
+                            <div class="invalid-feedback">
+                                Please provide a Friendly Name.
+                            </div>
+                        <label for="identifier" class="mr-2 mt-2">Chat Channel SID:</label>
+                            <input class="form-control" id="chatIdentifier"  type="text"  required></input>
+                            <div class="invalid-feedback">
+                                Chat SID must be of length 34.
+                            </div>
+                        <label for="proxyIdentifier" class="mr-2 mt-2">Assigned Proxy # <i>(optional)</i>:</label>
+                            <input class="form-control" id="proxyChatIdentifier"  type="tel"></input>
+                            <div class="invalid-feedback">
+                                Needs to be a valid E.164 Phone Number.
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button data-serviceSid="{{serviceSid}}" data-sessionSid="{{sessionSid}}" id="createChatParticipant" type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+                <div id="modal-errorChatCreate" class="mx-4 alert alert-danger" role="alert" style="display:none">
+                    <span id="errorMsgChatCreate"></span>
+                </div>
+            </div>
+        </div>
+    </div>    
+    <div id="modalCall" class="modal fade" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -78,7 +120,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button data-participantPhone="" id="initiateDial" type="button" class="btn btn-primary">Place Call</button>
+                        <button id="initiateDial" type="button" class="btn btn-primary">Place Call</button>
                         <button id="hangupCall" type="button" class="btn btn-danger" style="display: none">Hangup Call</button>
                     </div>
                 <div id="modal-errorDial" class="mx-4 alert alert-danger" role="alert" style="display:none">
@@ -90,16 +132,100 @@
             </div>
         </div>
     </div>
+    <div id="modalSMS" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send SMS</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <form action="#" class="sendSMS" novalidate="">
+                    <div class="modal-body">
+                        <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Your Message:</span>
+                        </div>
+                            <textarea maxlength="1600" id="body" class="form-control" aria-label="Your Message:"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button data-serviceSid="{{serviceSid}}" data-sessionSid="{{sessionSid}}" id="smsSubmit" type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                </form>
+                <div id="modal-errorSMS" class="mx-4 alert alert-danger" role="alert" style="display:none">
+                    <p id="errorMsgSMS"></p>
+                </div>
+                <div id="modal-successSMS" class="mx-4 alert alert-success" role="alert" style="display:none">
+                    <p id="successMsgSMS"></p>
+                </div>                
+            </div>
+        </div>
+    </div>
+   <div id="modalChat" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chat Window</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                    <div class="modal-body" id="chatBody">
+ 
+                    </div>
+                    <div class="modal-footer">
+                        <input id="chat-input" class="mr-auto w-100" type="text" placeholder="type and hit 'enter' to send" autofocus/>  
+                    </div>
+                <div id="modal-errorChat" class="mx-4 alert alert-danger" role="alert" style="display:none">
+                    <p id="errorMsgChat"></p>
+                </div>
+                <div id="modal-successChat" class="mx-4 alert alert-success" role="alert" style="display:none">
+                    <p id="successMsgChat"></p>
+                </div>                
+            </div>
+        </div>
+    </div>
+<br>
 <br>
 <div id="errorDiv" class="mx-4 alert alert-danger" role="alert" style="display:none">
     <span id="errorMsgMain"></span>
 </div>
+<div id="successDiv" class="mx-4 alert alert-success" role="alert" style="display:none">
+    <span id="successMsgMain"></span>
+</div>
 
 <script>
-    $(document).ready(function(){
+    $(document).ready(function(data){
         $('#identifier, #proxyIdentifier').inputmask({
             "regex": "^\\+?[1-9]\\d{4,14}$"                        
         }); //specifying options
+            $('#successDiv').hide();
+            $('#successMsgMain').text("");  
+            //Get access token for both client voice and chat (for production code would have token management, but this gets a new token every time the page is requested)
+            $.ajax({
+                url: `/proxyClientAccessToken`,
+                type: 'POST',
+            }).done((data) => {
+                sessionStorage.setItem('ChatConfig', data.ChatConfig);
+                sessionStorage.setItem('DialConfig', data.DialConfig);
+                if(data.JwtToken)
+                {
+                    sessionStorage.setItem('ClientAccessToken', data.JwtToken);
+                }
+                else{
+                    sessionStorage.removeItem('ClientAccessToken')
+                }
+                $('#successDiv').show();
+                let successMsg = "Note: Chat and Dial configuration for this app are not enabled. To enable see instructions: https://github.com/Cfee2000/twilio-proxy-admin-app";
+                if(data.ChatConfig == true || data.DialConfig == true)
+                {
+                    successMsg = "JWT Token Generated Successfully";
+                }
+                $('#successMsgMain').text(successMsg);
+            }).fail((xhr, status, error) => {
+                sessionStorage.removeItem('ClientAccessToken');
+                $('#errorDiv').show();
+                $('#errorMsgMain').text(xhr.responseText);
+            });
     });
 
     $(`[id^=del]`).click((event) => {
@@ -108,7 +234,12 @@
         let sessionSid = event.currentTarget.attributes.getNamedItem("data-sessionSid").value;
 
         $.ajax({
-            url: `/participantDelete?serviceSid=${serviceSid}&sessionSid=${sessionSid}&participantSid=${participantSid}`,
+            url: `/participantDelete`,
+            data: {
+                serviceSid: serviceSid,
+                sessionSid: sessionSid,
+                participantSid: participantSid
+            },
             type: 'POST',
         }).done((data) => {
             location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
@@ -130,11 +261,19 @@
             event.preventDefault(); //This is absolutly necessary to prevent Promise Rejection warnings
             let serviceSid = event.currentTarget.createParticipant.attributes.getNamedItem("data-serviceSid").value;
             let sessionSid = event.currentTarget.createParticipant.attributes.getNamedItem("data-sessionSid").value;
-            let friendlyname = event.currentTarget.friendlyName.value;
+            let friendlyName = event.currentTarget.friendlyName.value;
             let identifier = event.currentTarget.identifier.value.replace(/\D/g,'');
             let proxyIdentifier = event.currentTarget.proxyIdentifier.value.replace(/\D/g,'');
             $.ajax({
-                url: `/createParticipant?proxyIdentifier=${proxyIdentifier}&serviceSid=${serviceSid}&sessionSid=${sessionSid}&friendlyName=${friendlyname}&identifier=${identifier}`,
+                url: `/createParticipant`,
+                data: {
+                    chatParticipant: false,
+                    proxyIdentifier: proxyIdentifier,
+                    serviceSid: serviceSid,
+                    sessionSid: sessionSid,
+                    friendlyName: friendlyName,
+                    identifier: identifier
+                },
                 type: 'POST',
             }).done((data) => {
                 location.reload(); 
@@ -146,34 +285,198 @@
 
     });
 
+    $('.participantChatValidation').submit((event) => {
+        if ($('.participantChatValidation')[0].checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+            $('.participantChatValidation').addClass('was-validated');
+        }
+        else{
+            $('.participantChatValidation').addClass('was-validated');
+            event.preventDefault(); //This is absolutly necessary to prevent Promise Rejection warnings
+            let serviceSid = event.currentTarget.createChatParticipant.attributes.getNamedItem("data-serviceSid").value;
+            let sessionSid = event.currentTarget.createChatParticipant.attributes.getNamedItem("data-sessionSid").value;
+            let friendlyName = event.currentTarget.chatName.value;
+            let identifier = event.currentTarget.chatIdentifier.value;
+            let proxyIdentifier = event.currentTarget.proxyChatIdentifier.value.replace(/\D/g,'');
+            $.ajax({
+                url: `/createParticipant`,
+                data: {
+                    chatParticipant: true,
+                    proxyIdentifier: proxyIdentifier,
+                    serviceSid: serviceSid,
+                    sessionSid: sessionSid,
+                    friendlyName: friendlyName,
+                    identifier: identifier
+                },
+                type: 'POST',
+            }).done((data) => {
+                location.reload(); 
+            }).fail((xhr, status, error) => {
+                $('#modal-errorChatCreate').show();
+                $('#errorMsgChatCreate').text(xhr.responseText);
+            });          
+        }
+
+    });
+
+   $('#modalChat').on('show.bs.modal', function(event) {
+        let token = sessionStorage.getItem('ClientAccessToken');
+        let chatChannelSID = event.relatedTarget.attributes.getNamedItem("data-participantPhone").value;
+        
+        if(sessionStorage.getItem('ChatConfig') == "false"){
+            $('#modal-errorChat').show();
+            $('#errorMsgChat').text("This app is not configured for chat. See Readme: https://github.com/Cfee2000/twilio-proxy-admin-app"); 
+        }else{
+            initializeChat(token, chatChannelSID);
+        }
+        
+   });
+
+    $('#modalChat').on('hide.bs.modal', function(e) {
+        $('#modal-successChat').hide();
+        $('#modal-errorChat').hide();
+        $('#successMsgChat').empty();
+        $('#errorMsgChat').empty();
+    });
+
+   async function initializeChat(token, chatChannelSID){
+        // Initialize the Chat client
+        
+        let client = await Twilio.Chat.Client.create(token);
+        await client.getSubscribedChannels();
+        let channel = await client.getChannelBySid(chatChannelSID);
+        let joinedChannel;
+        if(channel.state.status != "joined")
+        {
+            joinedChannel = await channel.join();
+        }
+        else{
+            joinedChannel = channel;
+        }
+
+        joinedChannel.on('messageAdded', function(message) {
+            console.log(message);
+            printMessage(message.author, message.body);
+        });
+
+        $('#chat-input').on('keydown', (e) => {
+            let input = $('#chat-input');
+            if(e.keyCode == 13) {
+                joinedChannel.sendMessage(input.val());
+                input.val('');
+            }
+        });
+   };
+
+  // Helper function to print chat message to the chat window
+  function printMessage(fromUser, message) {
+    let user = $('<span style="font-weight:bold;" class="username">').text(fromUser + ':');
+    let brk = $('<br>');
+    let msg = $('<span class="message">').text(message);
+    let container = $('<div class="message-container">');
+    $('#chatBody').append(user).append(msg).append(brk);
+    $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
+  }
+
     $('#modalCall').on('show.bs.modal', function(event) {
         let participantPhone = event.relatedTarget.dataset.participantphone;
         let proxyPhone = event.relatedTarget.dataset.proxyphone;
-        $.ajax({
-            url: `/proxyAccessToken`,
-            type: 'POST',
-        }).done((data) => {
+        let sessionStatus = event.relatedTarget.dataset.sessionstatus;
+        let sessionMode = event.relatedTarget.dataset.sessionmode;
+
+        if(sessionMode == "message-only")
+        {
+            $('#initiateDial').hide();
+            $('#modal-errorDial').show();
+            $('#errorMsgDial').text("You must enable Voice on this Session first");
+        }
+        else if(sessionStatus == "closed"){
+            $('#initiateDial').hide();
+            $('#modal-errorDial').show();
+            $('#errorMsgDial').text("Session is closed. You must re-open the Session before you can place a call");        
+        }
+        else if(sessionStorage.getItem('DialConfig') == "false"){
+            $('#initiateDial').hide();
+            $('#modal-errorDial').show();
+            $('#errorMsgDial').text("This app is not configured for outbound dial. See Readme: https://github.com/Cfee2000/twilio-proxy-admin-app"); 
+        }
+        else{
+            $('#initiateDial').show();
+            $('#modal-errorDial').hide();
             $('#initiateDial').attr('data-participantPhone', `${participantPhone}`);
             $('#initiateDial').attr('data-proxyPhone', `${proxyPhone}`);
-            //$('#JWT').text(data); //Only for Demo purposes. Need to securely store token for prduction code
-            sessionStorage.setItem('accessToken', data);
-            $('#modal-successDial').show();
-            $('#successMsgDial').text("JWT Token Generated Successfully");
-        }).fail((xhr, status, error) => {
-            sessionStorage.removeItem('accessToken');
-            $('#errorMsgMain').text(xhr.responseText);
-            $('#modalCall').hide();
-        });
+        }
     });
     $('#modalCall').on('hide.bs.modal', function(e) {
-        $('#errorMsgCreate').empty();
+        $('#modal-successDial').hide();
+        $('#modal-errorDial').hide();
+        $('#successMsgDial').empty();
+        $('#errorMsgDial').empty();
+    });
+
+    $('#modalSMS').on('show.bs.modal', function(event) {
+        
+        let participantPhone = event.relatedTarget.dataset.participantphone;
+        let proxyPhone = event.relatedTarget.dataset.proxyphone;
+        let sessionStatus = event.relatedTarget.dataset.sessionstatus;
+        let sessionMode = event.relatedTarget.dataset.sessionmode;
+
+        if(sessionMode == "voice-only")
+        {
+            $('#smsSubmit').hide();
+            $('#modal-errorSMS').show();
+            $('#errorMsgSMS').text("You must enable SMS on this Session first");
+        }
+        else if(sessionStatus == "closed"){
+            $('#smsSubmit').hide();
+            $('#modal-errorSMS').show();
+            $('#errorMsgSMS').text("Session is closed. You must re-open the Session before you can send SMS");         
+        }
+        else{
+            $('#smsSubmit').attr('data-participantPhone', `${participantPhone}`);
+            $('#smsSubmit').attr('data-proxyPhone', `${proxyPhone}`);
+            $('#sendSMS').show();
+            $('#modal-errorSMS').hide();
+        }
+    });
+    $('#modalSMS').on('hide.bs.modal', function(e) {
+        $('#body')[0].value = "";
+        $('#modal-successSMS').hide();
+        $('#modal-errorSMS').hide();
+        $('#successMsgSMS').empty();
+        $('#errorMsgSMS').empty();
+    });
+
+    $('.sendSMS').submit((event) => {
+        let body = event.currentTarget.body.value;
+        event.preventDefault(); //This is absolutly necessary to prevent Promise Rejection warnings
+        let participantPhone = event.currentTarget.smsSubmit.attributes.getNamedItem("data-participantPhone").value;
+        let proxyPhone = event.currentTarget.smsSubmit.attributes.getNamedItem("data-proxyPhone").value;
+        $.ajax({
+            url: `/createMessage`,
+            data: {
+                to: proxyPhone,
+                from: participantPhone,
+                body: body
+            },
+            type: 'POST',
+        }).done((data) => {
+            $('#modal-successSMS').show();
+            $('#successMsgSMS').text("Message sent successfully. SID=" + data);            
+            //location.reload(); //Implement partial refresh for production code, but for ease of demo, just reload the page
+            //setTimeout(location.reload.bind(location), 8000);
+        }).fail((xhr, status, error) => {
+            $('#modal-errorSMS').show();
+            $('#errorMsgSMS').text(xhr.responseText);
+        });
     });
 
     $('#initiateDial').click((event) => {
         let participantPhone = event.currentTarget.attributes.getNamedItem("data-participantPhone").value;
         let proxyPhone = event.currentTarget.attributes.getNamedItem("data-proxyPhone").value;
         //let token = $('#JWT').text();
-        let token = sessionStorage.getItem('accessToken');
+        let token = sessionStorage.getItem('ClientAccessToken');
         try{
             // Setup Twilio.Device
             device = new Twilio.Device(token, {
@@ -185,52 +488,55 @@
                 // a second time and sending the tone twice. This will be default in 2.0.
                 fakeLocalDTMF: true,
             });
+            device.on('ready',function (device) {
+                console.log('Twilio.Device Ready!');
+                var params = {
+                    To: proxyPhone,
+                    From: participantPhone
+                };
+
+                if(device){
+                    device.connect(params);
+                }
+            });
+
+            $('#hangupCall').click((event) => {
+                if (device) {
+                    device.disconnectAll();
+                }
+            });
+
+            device.on('error', function (error) {
+                console.log('Twilio.Device Error: ' + error.message);
+                $('#modal-errorCreate').show();
+                $('#errorMsgCreate').text(error.message);
+                if (device) {
+                    device.disconnectAll();
+                }
+            });
+
+            device.on('connect', function (conn) {
+                console.log('Successfully established call!');
+                document.getElementById('initiateDial').style.display = 'none';
+                document.getElementById('hangupCall').style.display = 'inline';
+                //volumeIndicators.style.display = 'block';
+                //bindVolumeIndicators(conn);
+            });
+
+            device.on('disconnect', function (conn) {
+                console.log('Call ended.');
+                document.getElementById('initiateDial').style.display = 'inline';
+                document.getElementById('hangupCall').style.display = 'none';
+                //volumeIndicators.style.display = 'none';
+            });
         }catch(err){
-            $('#modal-errorCreate').show();
-            $('#errorMsgCreate').text(err.message + " Close modal window and reopen to fetch new Access Token.");
+            $('#modal-errorDial').show();
+            $('#errorMsgDial').text(err.message + " Close modal window and reopen to fetch new Access Token.");
+            document.getElementById('initiateDial').style.display = 'inline';
+            document.getElementById('hangupCall').style.display = 'none';
         }
 
-      device.on('ready',function (device) {
-        console.log('Twilio.Device Ready!');
-        var params = {
-            To: proxyPhone,
-            From: participantPhone
-        };
 
-        if(device){
-            device.connect(params);
-        }
-      });
-
-    $('#hangupCall').click((event) => {
-        if (device) {
-            device.disconnectAll();
-        }
-      });
-
-      device.on('error', function (error) {
-        console.log('Twilio.Device Error: ' + error.message);
-        $('#modal-errorCreate').show();
-        $('#errorMsgCreate').text(error.message);
-        if (device) {
-            device.disconnectAll();
-        }
-      });
-
-      device.on('connect', function (conn) {
-        console.log('Successfully established call!');
-        document.getElementById('initiateDial').style.display = 'none';
-        document.getElementById('hangupCall').style.display = 'inline';
-        //volumeIndicators.style.display = 'block';
-        //bindVolumeIndicators(conn);
-      });
-
-      device.on('disconnect', function (conn) {
-        console.log('Call ended.');
-        document.getElementById('initiateDial').style.display = 'inline';
-        document.getElementById('hangupCall').style.display = 'none';
-        //volumeIndicators.style.display = 'none';
-      });
     })
 
 </script>

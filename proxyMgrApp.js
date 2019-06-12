@@ -1,9 +1,12 @@
 const express = require('express');
 const axios = require('axios');
 const exphbs = require('express-handlebars');
+// const https = require('https');
+// const fs = require('fs');
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 const AccessToken = require('twilio').jwt.AccessToken;
 const VoiceGrant = AccessToken.VoiceGrant;
+const ChatGrant = AccessToken.ChatGrant;
 
 require('dotenv').config();
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -12,6 +15,7 @@ const proxyAPIKey = process.env.API_KEY;
 const proxyAPISecret = process.env.API_SECRET;
 
 const outgoingApplicationSid = process.env.PROXY_TWIML_APP_SID;
+const chatServiceSid = process.env.CHAT_SERVICE_SID;
 
 const client = require('twilio')(accountSid, authToken);
 
@@ -57,6 +61,21 @@ hbs.registerHelper('ifCond', function (v1, operator, v2, options) {
     }
 });
 
+hbs.registerHelper('ifAndOrCond', function (v1, operator, operator2, v2, v3, options) {
+
+    switch (operator) {
+        case '==':
+            switch(operator2){
+                case '&&':            
+                    return ((v1 == v2) && (v1 == v3)) ? options.fn(this) : options.inverse(this);
+                case '||':
+                    return ((v1 == v2) || (v1 == v3)) ? options.fn(this) : options.inverse(this);
+            }
+        default:
+            return options.inverse(this);
+    }
+});
+
 // Body Parser Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -77,21 +96,41 @@ app.post('/proxyDemoOutboundDial', (req, res) => {
 });
 
 
-app.post('/proxyAccessToken', (req, res) => {
+app.post('/proxyClientAccessToken', (req, res) => {
     try{
-        const identity = 'user';
+        let dialConfigExists = false;
+        let chatConfigExists = false;
+        if(!outgoingApplicationSid && !chatServiceSid)
+        {
+            res.send({DialConfig: dialConfigExists, ChatConfig: chatConfigExists, JwtToken: ""});
+        }else{
+            const identity = 'ProxyClientDemo';
 
-        const voiceGrant = new VoiceGrant({
-            outgoingApplicationSid: outgoingApplicationSid
-        });
-        const token = new AccessToken(accountSid, proxyAPIKey, proxyAPISecret);
-        token.addGrant(voiceGrant);
-        token.identity = identity;
+            const voiceGrant = new VoiceGrant({
+                outgoingApplicationSid: outgoingApplicationSid
+            });
+            const chatGrant = new ChatGrant({
+                serviceSid: chatServiceSid
+            });
+            //Grant both voice and chat access
+            const token = new AccessToken(accountSid, proxyAPIKey, proxyAPISecret);
+            if(outgoingApplicationSid)
+            {
+                dialConfigExists = true;
+                token.addGrant(voiceGrant);
+            }
+            if(chatServiceSid)
+            {
+                chatConfigExists = true;
+                token.addGrant(chatGrant);
+            }      
+            token.identity = identity;
 
-        let JWT = token.toJwt();
-        // Serialize the token to a JWT string
-        console.log(JWT);
-        res.send(JWT);
+            let JWT = token.toJwt();
+            // Serialize the token to a JWT string
+            console.log(JWT);
+            res.send({DialConfig: dialConfigExists, ChatConfig: chatConfigExists, JwtToken: JWT});
+        }
 
     }catch(err){
         if(err.status)
@@ -99,7 +138,7 @@ app.post('/proxyAccessToken', (req, res) => {
             res.status(err.status).send(err.message);
         }
         else{
-            res.status("400").send(err.message);
+            res.status("500").send(err.message);
         }
     }
 });
@@ -130,9 +169,9 @@ async function createService(req, res){
     try{
         let result = await client.proxy.services
             .create({
-                uniqueName: req.query.uniqueName,
-                geoMatchLevel: req.query.geoMatchLevel,
-                numberSelectionBehavior: req.query.numberSelectionBehavior
+                uniqueName: req.body.uniqueName,
+                geoMatchLevel: req.body.geoMatchLevel,
+                numberSelectionBehavior: req.body.numberSelectionBehavior
             });
         res.send(result.sid);
     }catch(err){
@@ -142,7 +181,7 @@ async function createService(req, res){
 }
 
 app.post('/serviceDelete', (req, res) => {
-    client.proxy.services(req.query.serviceSid)
+    client.proxy.services(req.body.serviceSid)
     .remove((err, items) => {
         if(err){
             console.log(err);
@@ -158,15 +197,15 @@ app.post('/createSession', (req, res) => {
 });
 
 async function createSession(req, res){
-    if(req.query.ttl)
+    if(req.body.ttl)
     {
         try{
-            let result = await client.proxy.services(req.query.serviceSid)
+            let result = await client.proxy.services(req.body.serviceSid)
                 .sessions
                 .create({
-                    uniqueName: req.query.uniqueName,
-                    mode: req.query.mode,
-                    ttl: req.query.ttl
+                    uniqueName: req.body.uniqueName,
+                    mode: req.body.mode,
+                    ttl: req.body.ttl
                 });
             res.send(result.sid);
         }catch(err){
@@ -175,11 +214,11 @@ async function createSession(req, res){
         }        
     }else{
         try{
-            let result = await client.proxy.services(req.query.serviceSid)
+            let result = await client.proxy.services(req.body.serviceSid)
                 .sessions
                 .create({
-                    uniqueName: req.query.uniqueName,
-                    mode: req.query.mode
+                    uniqueName: req.body.uniqueName,
+                    mode: req.body.mode
                 });
             res.send(result.sid);
         }catch(err){
@@ -191,8 +230,8 @@ async function createSession(req, res){
 }
 
 app.post('/sessionDelete', (req, res) => {
-    client.proxy.services(req.query.serviceSid)
-    .sessions(req.query.sessionSid)
+    client.proxy.services(req.body.serviceSid)
+    .sessions(req.body.sessionSid)
     .remove((err, items) => {
         if(err){
             console.log(err);
@@ -204,9 +243,9 @@ app.post('/sessionDelete', (req, res) => {
 });
 
 app.post('/sessionUpdate', (req, res) => {
-    if(req.query.updateStatus == 'closed'){
-        client.proxy.services(req.query.serviceSid)
-        .sessions(req.query.sessionSid)
+    if(req.body.updateStatus == 'closed'){
+        client.proxy.services(req.body.serviceSid)
+        .sessions(req.body.sessionSid)
         .update({status: "in-progress"}, (err, items) => {
             if(err){
                 console.log(err);
@@ -217,8 +256,8 @@ app.post('/sessionUpdate', (req, res) => {
         });
     }
     else{
-        client.proxy.services(req.query.serviceSid)
-        .sessions(req.query.sessionSid)
+        client.proxy.services(req.body.serviceSid)
+        .sessions(req.body.sessionSid)
         .update({status: "closed"}, (err, items) => {
             if(err){
                 console.log(err);
@@ -234,14 +273,35 @@ app.post('/createParticipant', (req, res) => {
     createParticipant(req, res);     
 });
 
+app.post('/createMessage', (req, res) => {
+    createMessage(req.body, res);     
+});
+
+async function createMessage(body, res) {
+    try{
+        let result = await client.messages
+        .create({from: body.from, body: body.body, to: body.to});
+        res.send(result.sid);
+    }catch(err){
+        console.log(err);
+        res.status(err.status).send(err.message);
+    }
+}
+
 async function createParticipant(req, res){
-    if(req.query.proxyIdentifier)
+    let identifier = req.body.identifier;
+    if(!req.body.chatParticipant)
+    {
+        identifier = "+" + req.body.identifier
+    }
+ 
+    if(req.body.proxyIdentifier)
     {
         try{
-            let result = await client.proxy.services(req.query.serviceSid)
-                .sessions(req.query.sessionSid)
+            let result = await client.proxy.services(req.body.serviceSid)
+                .sessions(req.body.sessionSid)
                 .participants
-                .create({friendlyName: req.query.friendlyName, identifier: "+" + req.query.identifier, proxyIdentifier: "+" + req.query.proxyIdentifier});
+                .create({friendlyName: req.body.friendlyName, identifier: identifier, proxyIdentifier: "+" + req.body.proxyIdentifier});
             res.send(result.sid);
         }catch(err){
             console.log(err);
@@ -249,23 +309,22 @@ async function createParticipant(req, res){
         }
     }else{
         try{
-            let result = await client.proxy.services(req.query.serviceSid)
-                .sessions(req.query.sessionSid)
+            let result = await client.proxy.services(req.body.serviceSid)
+                .sessions(req.body.sessionSid)
                 .participants
-                .create({friendlyName: req.query.friendlyName, identifier: "+" + req.query.identifier});
+                .create({friendlyName: req.body.friendlyName, identifier: identifier});
             res.send(result.sid);
         }catch(err){
             console.log(err);
             res.status(err.status).send(err.message);
         }
     }
-
 }
 
 app.post('/participantDelete', (req, res) => {
-    client.proxy.services(req.query.serviceSid)
-    .sessions(req.query.sessionSid)
-    .participants(req.query.participantSid)
+    client.proxy.services(req.body.serviceSid)
+    .sessions(req.body.sessionSid)
+    .participants(req.body.participantSid)
     .remove((err, items) => {
         if(err){
             console.log(err);
@@ -281,10 +340,10 @@ app.post('/reservePhone', (req, res) => {
 })
 
 async function reservePhone(req, res) {
-    let reserve = (req.query.isReserved == 'false');
+    let reserve = (req.body.isReserved == 'false');
     try{
-        let result = await client.proxy.services(req.query.serviceSid)
-                .phoneNumbers(req.query.phoneSid)
+        let result = await client.proxy.services(req.body.serviceSid)
+                .phoneNumbers(req.body.phoneSid)
                 .update({isReserved: reserve}, (err, items) => {
                     if(err){
                         console.log(err);
@@ -384,7 +443,10 @@ async function getParticipants(query, res) {
     res.render('participants', {
         participants: participantsList,
         sessionSid: query.sessionSid,
-        serviceSid: query.serviceSid
+        serviceSid: query.serviceSid,
+        sessionStatus: query.sessionStatus,
+        sessionMode: query.sessionMode
+
     }); 
 }
 
@@ -596,4 +658,9 @@ async function processRecordCall(req){
     }
 }
 
+// https.createServer({
+//     key: fs.readFileSync('server.key'),
+//     cert: fs.readFileSync('server.crt')
+//   }, app)
+//   .listen(PORT, () => console.log(`Server started on port ${PORT}`));
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

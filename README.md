@@ -15,7 +15,7 @@ This app uses Node Express as the backend and Handlebars https://handlebarsjs.co
 
 1. A Twilio Account with access to the Twilio Console (functionality in the app will assume you are logged in and can link to the console)
 2. An accessable web server running Node.js (can be your local machine for development)
-3. A publically accessible HTTP/S endpoint (may opt to use [Ngrok](https://ngrok.com/) to facilitate for local development)
+3. A publically accessible HTTP/S endpoint (may opt to use [Ngrok](https://ngrok.com/) to facilitate for local development, and if so **I suggest you run the app over the HTTPS tunnel to keep the connection secure**)
 
 ## Installing
 
@@ -30,13 +30,23 @@ npm install -S axios, express, twilio, express-handlebars, dotenv
 
 Optionally, you can install packages like nodemon if you want changes to be published instantly
 
-## Click to Call Setup
+## Click to Call Setup (optional)
 
-Click to call setup is mandatory, so please follow the steps below: <br> 
+Click to call setup is now OPTIONAL. Please follow the steps below to enable (*Note you will need to uncomment the PROXY_TWIML_APP_SID value in your .env file*): <br> 
 ```Step 1:``` Create a [TwiML App](https://www.twilio.com/console/voice/twiml/apps) and set the Voice "Request URL" to your publically accessible endpoint with route "proxyDemoOutboundDial" ```(ie. http://XXXXXX.ngrok.io/proxyDemoOutboundDial```.<br> 
-```Step 2:``` Copy the Application SID from the TwiML App and assigned it to variable PROXY_TWIML_APP_SID in your .env file.<br>
+```Step 2:``` Copy the Application SID from the TwiML App and assign it to variable PROXY_TWIML_APP_SID in your .env file.<br>
 ```Step 3:``` Create an [API Key](https://www.twilio.com/console/runtime/api-keys) and copy the Key SID and Key Secret and assign to variables API_KEY and API_SECRET respectively in your .env file. *Note: Start with the Key Secret first as you only get one chance to view the secret*<br>
 ```Step 4:``` Copy the Application SID from the TwiML App and assigned it to variable PROXY_TWIML_APP_SID in your .env file.<br>
+
+## Chat Setup (optional)
+
+Please follow the steps below to enable (*Note you will need to uncomment the CHAT_SERVICE_SID value in your .env file*): <br> 
+```Step 1:``` Create a [Programmable Chat Service](https://www.twilio.com/console/chat/dashboard) with default settings<br> 
+```Step 2:``` Copy the Chat Service SID and assign it to variable CHAT_SERVICE_SID in your .env file.<br>
+```Step 3:``` Copy the Chat Service SID and paste into [Your Proxy Service](https://www.twilio.com/console/proxy) under the Optional configuration ```CHAT INSTANCE SID``` field.
+```Step 4:``` Use the [API Explorer Chat Create](https://www.twilio.com/console/runtime/api-explorer/chat/chat-channels/create) to create a Chat Channel for your Chat Service. The Chat Service SID is required. Copy the Chat Channel SID from the output of the create operation.<br>
+```Step 5:``` Back in the app, create a Proxy Session and a Proxy Participant within that session that is a 'Chat' participant. On creating the 'Chat' participant, you MUST use the value of the Chat Channel SID from Step 4 as the "Chat Channel SID" on creating the chat participant.<br>
+```Step 6:``` Use the [API Explorer Chat Update](https://www.twilio.com/console/runtime/api-explorer/chat/chat-channels/update) this time to MODIFY the Chat Channel for your Chat Service. **It is essential that you add the following to the Attributes optional field to ensure the Chat communications can be sent to SMS ```{"serviceNumber":[Whatever you want],"twilioNumber":[Proxy # for your Chat Channel Participant],"from":[Actual Phone Number that will recieve the SMS],"forwarding": true, "proxySession": [The proxy session associated with your Chat Channel Participant]} ```**<br>
 
 ## Call Recording Setup (optional)
 
