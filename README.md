@@ -41,6 +41,7 @@ Please follow the steps below to enable (*Note you will need to uncomment the PR
 **IMPORTANT! - If you have not already done so, you will have to setup a [Verified Caller ID](https://www.twilio.com/console/phone-numbers/verified) if you wish to dial from a non-Twilio number. You can dial from a Twilio number as well, just make sure you click the appropriate "Dial" button in the app (ie. You must use the "Dial" button for the participant you wish to dial from). If you do not dial from a Twilio number or a Verified Caller ID, the call will not be placed.**
 
 ## Inbound Call Setup (optional)
+```Prerequisites:```Click to Call Setup (see above)<br>
 Please follow the steps below to enable: <br> 
 ```Step 1:``` Create a [TwiML Bin](https://www.twilio.com/console/runtime/twiml-bins) with the following configuration.<br>
 ``` 
