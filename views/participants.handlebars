@@ -121,6 +121,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                         <button id="initiateDial" type="button" class="btn btn-primary">Place Call</button>
+                        <button id="answerCall" type="button" class="btn btn-warning" style="display: none">Answer Call?</button>
                         <button id="hangupCall" type="button" class="btn btn-danger" style="display: none">Hangup Call</button>
                     </div>
                 <div id="modal-errorDial" class="mx-4 alert alert-danger" role="alert" style="display:none">
@@ -194,7 +195,9 @@
 </div>
 
 <script>
+    let device = "";
     $(document).ready(function(data){
+
         $('#identifier, #proxyIdentifier').inputmask({
             "regex": "^\\+?[1-9]\\d{4,14}$"                        
         }); //specifying options
@@ -221,6 +224,81 @@
                     successMsg = "JWT Token Generated Successfully";
                 }
                 $('#successMsgMain').text(successMsg);
+                try{
+                    // Setup Twilio.Device
+                    device = new Twilio.Device(sessionStorage.getItem('ClientAccessToken'), {
+                        // Set Opus as our preferred codec. Opus generally performs better, requiring less bandwidth and
+                        // providing better audio quality in restrained network conditions. Opus will be default in 2.0.
+                        codecPreferences: ['opus', 'pcmu'],
+                        // Use fake DTMF tones client-side. Real tones are still sent to the other end of the call,
+                        // but the client-side DTMF tones are fake. This prevents the local mic capturing the DTMF tone
+                        // a second time and sending the tone twice. This will be default in 2.0.
+                        fakeLocalDTMF: true,
+                    });
+
+                    device.on('error', function (error) {
+                        console.log('Twilio.Device Error: ' + error.message);
+                        $('#modal-errorCreate').show();
+                        $('#errorMsgCreate').text(error.message);
+                        if (device) {
+                            device.disconnectAll();
+                        }
+                    });
+
+                    device.on('cancel', function (conn) {
+                        if(device)
+                        {
+                            device.disconnectAll();
+                        }
+                        console.log('Incoming Call cancelled: ');
+                        document.getElementById('initiateDial').style.display = 'inline';
+                        document.getElementById('hangupCall').style.display = 'none';
+                        document.getElementById('answerCall').style.display = 'none';
+                        {{!-- $('#initiateDial').hide();
+                        $('#hangupCall').hide();
+                        $('#answerCall').show(); --}}
+                    });
+
+                    device.on('incoming', function (conn) {
+                        //connection = conn;
+                        console.log('Incoming Call pending: ');
+                        document.getElementById('initiateDial').style.display = 'none';
+                        document.getElementById('hangupCall').style.display = 'none';
+                        document.getElementById('answerCall').style.display = 'inline';
+                        {{!-- $('#initiateDial').hide();
+                        $('#hangupCall').hide();
+                        $('#answerCall').show(); --}}
+                    });
+                    
+                    device.on('connect', function (conn) {
+                        //connection = conn;
+                        sessionStorage.setItem('callSid', conn.parameters.CallSid);
+                        console.log('Successfully established call!');
+                        document.getElementById('initiateDial').style.display = 'none';
+                        document.getElementById('hangupCall').style.display = 'inline';
+                        document.getElementById('answerCall').style.display = 'none';
+                        //volumeIndicators.style.display = 'block';
+                        //bindVolumeIndicators(conn);
+                    });
+
+                    device.on('disconnect', function (conn) {
+                        if(device)
+                        {
+                            device.disconnectAll();
+                        }
+                        console.log('Call ended.');
+                        document.getElementById('initiateDial').style.display = 'inline';
+                        document.getElementById('hangupCall').style.display = 'none';
+                        document.getElementById('answerCall').style.display = 'none';
+                        //volumeIndicators.style.display = 'none';
+                    });
+                }catch(err){
+                    $('#modal-errorDial').show();
+                    $('#errorMsgDial').text(err.message + " Close modal window and reopen to fetch new Access Token.");
+                    document.getElementById('initiateDial').style.display = 'inline';
+                    document.getElementById('hangupCall').style.display = 'none';
+                    document.getElementById('answerCall').style.display = 'none';
+                }
             }).fail((xhr, status, error) => {
                 sessionStorage.removeItem('ClientAccessToken');
                 $('#errorDiv').show();
@@ -340,44 +418,44 @@
         $('#errorMsgChat').empty();
     });
 
-   async function initializeChat(token, chatChannelSID){
-        // Initialize the Chat client
-        
-        let client = await Twilio.Chat.Client.create(token);
-        await client.getSubscribedChannels();
-        let channel = await client.getChannelBySid(chatChannelSID);
-        let joinedChannel;
-        if(channel.state.status != "joined")
-        {
-            joinedChannel = await channel.join();
-        }
-        else{
-            joinedChannel = channel;
-        }
-
-        joinedChannel.on('messageAdded', function(message) {
-            console.log(message);
-            printMessage(message.author, message.body);
-        });
-
-        $('#chat-input').on('keydown', (e) => {
-            let input = $('#chat-input');
-            if(e.keyCode == 13) {
-                joinedChannel.sendMessage(input.val());
-                input.val('');
+    async function initializeChat(token, chatChannelSID){
+            // Initialize the Chat client
+            
+            let client = await Twilio.Chat.Client.create(token);
+            await client.getSubscribedChannels();
+            let channel = await client.getChannelBySid(chatChannelSID);
+            let joinedChannel;
+            if(channel.state.status != "joined")
+            {
+                joinedChannel = await channel.join();
             }
-        });
-   };
+            else{
+                joinedChannel = channel;
+            }
 
-  // Helper function to print chat message to the chat window
-  function printMessage(fromUser, message) {
-    let user = $('<span style="font-weight:bold;" class="username">').text(fromUser + ':');
-    let brk = $('<br>');
-    let msg = $('<span class="message">').text(message);
-    let container = $('<div class="message-container">');
-    $('#chatBody').append(user).append(msg).append(brk);
-    $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
-  }
+            joinedChannel.on('messageAdded', function(message) {
+                console.log(message);
+                printMessage(message.author, message.body);
+            });
+
+            $('#chat-input').on('keydown', (e) => {
+                let input = $('#chat-input');
+                if(e.keyCode == 13) {
+                    joinedChannel.sendMessage(input.val());
+                    input.val('');
+                }
+            });
+    };
+
+    // Helper function to print chat message to the chat window
+    function printMessage(fromUser, message) {
+        let user = $('<span style="font-weight:bold;" class="username">').text(fromUser + ':');
+        let brk = $('<br>');
+        let msg = $('<span class="message">').text(message);
+        let container = $('<div class="message-container">');
+        $('#chatBody').append(user).append(msg).append(brk);
+        $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight);
+    }
 
     $('#modalCall').on('show.bs.modal', function(event) {
         let participantPhone = event.relatedTarget.dataset.participantphone;
@@ -408,7 +486,77 @@
             $('#initiateDial').attr('data-proxyPhone', `${proxyPhone}`);
         }
     });
+
+    $('#initiateDial').click((event) => {
+        
+        let participantPhone = event.currentTarget.attributes.getNamedItem("data-participantPhone").value;
+        let proxyPhone = event.currentTarget.attributes.getNamedItem("data-proxyPhone").value;
+        var params = {
+            To: proxyPhone,
+            From: participantPhone
+        };
+
+        if(device){
+            //device.disconnectAll();
+            device.connect(params);
+        }
+    });
+
+    $('#hangupCall').click((event) => {
+
+        if(device){
+            device.disconnectAll();
+        }
+        {{!-- let outboundToClient = "";
+        if(connection._status == "open")
+        {
+            //Hangup Button was pressed AFTER phone call was answered
+            if(device.activeConnection().parameters.To)
+            {
+                outboundToClient = device.activeConnection().parameters.To;
+            }
+            //POST CALL SURVEY LOGIC - TRANSFER CALL TO AUTOPILOT
+            if (device) {
+                $.ajax({
+                    url: `/endCallIVR`,
+                    data: {
+                        CallSid: sessionStorage.getItem('callSid'),
+                        To: outboundToClient
+                    },
+                    type: 'POST',
+                }).done((data) => {
+                    device.disconnectAll();
+                }).fail((xhr, status, error) => {
+                    device.disconnectAll();
+                });
+            }
+        }else{
+            //Hangup Button was pressed BEFORE phone call was answered
+            device.disconnectAll();
+        } --}}
+    });
+
+
+
+    $('#answerCall').click((event) => {
+        device.activeConnection().accept();
+        //connection.accept();
+        console.log('Incoming Call answered');
+        document.getElementById('initiateDial').style.display = 'none';
+        document.getElementById('hangupCall').style.display = 'inline';
+        document.getElementById('answerCall').style.display = 'none';
+        //device.connect();
+    });
+
+
+
+
+
     $('#modalCall').on('hide.bs.modal', function(e) {
+        if(device)
+        {
+            device.disconnectAll();
+        }
         $('#modal-successDial').hide();
         $('#modal-errorDial').hide();
         $('#successMsgDial').empty();
@@ -471,73 +619,6 @@
             $('#errorMsgSMS').text(xhr.responseText);
         });
     });
-
-    $('#initiateDial').click((event) => {
-        let participantPhone = event.currentTarget.attributes.getNamedItem("data-participantPhone").value;
-        let proxyPhone = event.currentTarget.attributes.getNamedItem("data-proxyPhone").value;
-        //let token = $('#JWT').text();
-        let token = sessionStorage.getItem('ClientAccessToken');
-        try{
-            // Setup Twilio.Device
-            device = new Twilio.Device(token, {
-                // Set Opus as our preferred codec. Opus generally performs better, requiring less bandwidth and
-                // providing better audio quality in restrained network conditions. Opus will be default in 2.0.
-                codecPreferences: ['opus', 'pcmu'],
-                // Use fake DTMF tones client-side. Real tones are still sent to the other end of the call,
-                // but the client-side DTMF tones are fake. This prevents the local mic capturing the DTMF tone
-                // a second time and sending the tone twice. This will be default in 2.0.
-                fakeLocalDTMF: true,
-            });
-            device.on('ready',function (device) {
-                console.log('Twilio.Device Ready!');
-                var params = {
-                    To: proxyPhone,
-                    From: participantPhone
-                };
-
-                if(device){
-                    device.connect(params);
-                }
-            });
-
-            $('#hangupCall').click((event) => {
-                if (device) {
-                    device.disconnectAll();
-                }
-            });
-
-            device.on('error', function (error) {
-                console.log('Twilio.Device Error: ' + error.message);
-                $('#modal-errorCreate').show();
-                $('#errorMsgCreate').text(error.message);
-                if (device) {
-                    device.disconnectAll();
-                }
-            });
-
-            device.on('connect', function (conn) {
-                console.log('Successfully established call!');
-                document.getElementById('initiateDial').style.display = 'none';
-                document.getElementById('hangupCall').style.display = 'inline';
-                //volumeIndicators.style.display = 'block';
-                //bindVolumeIndicators(conn);
-            });
-
-            device.on('disconnect', function (conn) {
-                console.log('Call ended.');
-                document.getElementById('initiateDial').style.display = 'inline';
-                document.getElementById('hangupCall').style.display = 'none';
-                //volumeIndicators.style.display = 'none';
-            });
-        }catch(err){
-            $('#modal-errorDial').show();
-            $('#errorMsgDial').text(err.message + " Close modal window and reopen to fetch new Access Token.");
-            document.getElementById('initiateDial').style.display = 'inline';
-            document.getElementById('hangupCall').style.display = 'none';
-        }
-
-
-    })
 
 </script>
 

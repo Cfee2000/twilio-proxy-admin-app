@@ -107,7 +107,8 @@ app.post('/proxyClientAccessToken', (req, res) => {
             const identity = 'ProxyClientDemo';
 
             const voiceGrant = new VoiceGrant({
-                outgoingApplicationSid: outgoingApplicationSid
+                outgoingApplicationSid: outgoingApplicationSid,
+                incomingAllow: true, // Optional: add to allow incoming calls
             });
             const chatGrant = new ChatGrant({
                 serviceSid: chatServiceSid
