@@ -38,7 +38,7 @@ Click to call setup is now OPTIONAL. Please follow the steps below to enable (*N
 ```Step 2:``` Copy the Application SID from the TwiML App and assign it to variable PROXY_TWIML_APP_SID in your .env file.<br>
 ```Step 3:``` Create an [API Key](https://www.twilio.com/console/runtime/api-keys) and copy the Key SID and Key Secret and assign to variables API_KEY and API_SECRET respectively in your .env file. *Note: Start with the Key Secret first as you only get one chance to view the secret*<br>
 ```Step 4:``` Copy the Application SID from the TwiML App and assigned it to variable PROXY_TWIML_APP_SID in your .env file.<br>
-**IMPORTANT! - If you have not already done so, you will have to setup a [Verified Caller ID](https://www.twilio.com/console/phone-numbers/verified) if you wish to dial from a non-Twilio number**
+**IMPORTANT! - If you have not already done so, you will have to setup a [Verified Caller ID](https://www.twilio.com/console/phone-numbers/verified) if you wish to dial from a non-Twilio number. You can dial from a Twilio number as well, just make sure you click the appropriate "Dial" button in the app (ie. You must use the "Dial" button for the participant you wish to dial from). If you do not dial from a Twilio number or a Verified Caller ID, the call will not be placed.**
 
 ## Chat Setup (optional)
 
