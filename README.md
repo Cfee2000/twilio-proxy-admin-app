@@ -52,7 +52,7 @@ Please follow the steps below to enable: <br>
       </Dial>
     </Response>
 ```
-```Step 2:``` Go to your [Phone Numbers](https://www.twilio.com/console/phone-numbers/incoming) page and configure a Twilio Number to point to the TwiML Bin you created in Step #1 *(Note - you will select the TwiML Bin under Voice Calls on the "A Call Comes in" drop down)* <br>
+```Step 2:``` Go to your [Phone Numbers](https://www.twilio.com/console/phone-numbers/incoming) page and configure a Twilio Number to point to the TwiML Bin you created in Step #1 *(Note - you will select the TwiML Bin under Voice Calls on the "A Call Comes in" drop down)* You will need to use this Twilio phone number when creating one of your proxy participants so that calls can be placed and received via this number.<br>
 
 **IMPORTANT! - In order to handle inbound calling properly, you need to open the "Initiate Dial" modal window by clicking the "Dial" button on the Participants page in the app. A button labeled "Answer Call?" will be displayed in yellow/orange if an inbound call is coming from the PSTN (eg. cell phone) to your Twilio number configured in Step #2 above.**
 
