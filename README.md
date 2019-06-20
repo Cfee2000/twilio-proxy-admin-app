@@ -34,7 +34,7 @@ Optionally, you can install packages like nodemon if you want changes to be publ
 ## Click to Call Setup (optional)
 
 Please follow the steps below to enable (*Note you will need to uncomment the PROXY_TWIML_APP_SID value in your .env file*): <br> 
-```Step 1:``` Create a [TwiML App](https://www.twilio.com/console/voice/twiml/apps) and set the Voice "Request URL" to your publically accessible endpoint with route "proxyDemoOutboundDial" ```(ie. http://XXXXXX.ngrok.io/proxyDemoOutboundDial```.<br> 
+```Step 1:``` Create a [TwiML App](https://www.twilio.com/console/voice/twiml/apps) and set the Voice "Request URL" to your publically accessible endpoint with route "proxyDemoOutboundDial" ```(ie. https://XXXXXX.ngrok.io/proxyDemoOutboundDial```.<br> 
 ```Step 2:``` Copy the Application SID from the TwiML App and assign it to variable PROXY_TWIML_APP_SID in your .env file.<br>
 ```Step 3:``` Create an [API Key](https://www.twilio.com/console/runtime/api-keys) and copy the Key SID and Key Secret and assign to variables API_KEY and API_SECRET respectively in your .env file. *Note: Start with the Key Secret first as you only get one chance to view the secret*<br>
 ```Step 4:``` Copy the Application SID from the TwiML App and assigned it to variable PROXY_TWIML_APP_SID in your .env file.<br>
@@ -76,7 +76,7 @@ Embedded in this app is also an HTTP GET route "recordCall" for handling recordi
 The call recording requires that you add a Callback URL to the Twilio Proxy Service via the Twilio Console here: https://www.twilio.com/console/proxy/services/.
 
 ```Step 1:``` Click on your Proxy Service link<br>
-```Step 2:``` Add your callback url in the "Callback URL" field. If you are using Ngrok, you can specify 8080 as the default port and optionally add a subdomain to persist the Ngrok session:  ```ngrok http -subdomain=XXX.YYY 8080```. This should start ngrok and provide a URL similar ```http://XXXXXX.ngrok.io```, to which you append the "recordCall" route to use as your Callback URL ```(ie. http://XXXXXX.ngrok.io/recordCall```<br>
+```Step 2:``` Add your callback url in the "Callback URL" field. If you are using Ngrok, you can specify 8080 as the default port and optionally add a subdomain to persist the Ngrok session:  ```ngrok http -subdomain=XXX 8080```. This should start ngrok and provide a URL similar ```https://XXXXXX.ngrok.io```, to which you append the "recordCall" route to use as your Callback URL ```(ie. https://XXXXXX.ngrok.io/recordCall```<br>
 
 The Callback URL will webhook to your server and route to the "recordCall" endpoint, where it calls the "processRecordCall" async function. The implementation uses axios to POST to the recording API *(see [here](https://www.twilio.com/docs/voice/api/recording#create-a-recording-resource) for more info)*.
 
