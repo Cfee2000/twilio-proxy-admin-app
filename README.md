@@ -94,13 +94,13 @@ The links and buttons in the app will self-direct you to where you want to go
 
 ## Services Page
 
-Currently, the app lets you create a Service in minimal fashion, whereby you supply a Service Name and it creates a Service with all defaults applied. 
+Currently, the app lets you create a Service in minimal fashion, whereby you supply a Service Name, Geo Match Behavior, and Number Selection Behavior, and it creates a Service with all other defaults applied. 
 
 All Services are currently shown in a list. Clicking on a Service will take you to the Session page for that Service.
 
 ## Sessions Page
 
-Currently, the app lets you create a Session in minimal fashion, whereby you supply a Session Name and it creates a Session with all defaults applied. I'm planning an update to allow Time To Live and Mode to be optional parameters to specify when creating a Session.
+Currently, the app lets you create a Session in minimal fashion, whereby you supply a Session Name, Channel Mode, and Time to Live, and it creates a Session with all other defaults applied.
 
 Each session had a border color of either green (for open sessions) or yellow/orange (for closed sessions). You can toggle open/closed for each session with the "Close" button. *Note: re-opening a closed session sets the session status to "in-progress", not "open"*.
 
@@ -125,9 +125,19 @@ The Participants page shows each participant currently assigned to the given Ses
 
 Particpants can be deleted with the "Delete" button.
 
-There is also a "Quick Create" button that allows you to create a Participant. You must specify a Friendly Name and Participant Phone # to create a Participant. Optionally, you can specify a Proxy # to assign directly to the Participant (rather than letting the Proxy Service choose from your pool of numbers).
+There is also a "Create Participant" button that allows you to create a Participant. You must specify a Friendly Name and Participant Phone # to create a Participant. Optionally, you can specify a Proxy # to assign directly to the Participant (rather than letting the Proxy Service choose from your pool of numbers).
 
-If 2 Participants exist at any time for a particular Session, the UI will enable a "Dial" button that can be used for click-to-call from one participant to the other. The dialing participant will always be the participant you clicked the "Dial" button for, and the receiving participant will always be the adjacent participant. A JWT Access Token is generated for each time you click the "Dial" button. If the token generation was successful, a modal window will confirm you want to click-to-call. Pressing "Place Call" from the modal window will place the call. This will toggle the "Hangup Call" button to force terminate the call from the browser if desired.
+If you've implemented Chat, then you can use the "Create Chat Participant" if you're looking to start a chat between two participants.
+
+If 2 Participants exist at any time for a particular Session, the UI will enable a "Dial" button that can be used for click-to-call from one participant to the other. The dialing participant will always be the participant you clicked the "Dial" button for, and the receiving participant will always be the adjacent participant. Pressing "Place Call" from the modal window will place the call. This will toggle the "Hangup Call" button to force terminate the call from the browser if desired. 
+
+Inbound calling is also possible if you've completed the setup for it. To get an inbound call started, you can click the "Dial" button, and then from the PSTN (eg. cell phone of one participant) you can place an inbound call to the other participant (as long as you've followed the steps above on inbound call setup). In this case, the "Place Call" button will toggle to an "Answer Call?" button that will allow you to take the call from the browser.
+
+There is also a "Send SMS" button that will show up for each participant, and will allow you to send SMS from one participant outbound to the other participant on their cell phone.
+
+For 2-way messaging, you can use a chat participant and a regular participant, and then send messages back and forth Chat->SMS and SMS->Chat.
+
+Also, note that interactions don't have to take place within the UI. Text messages and phone calls can be sent between 2 particiapnts that are part of the proxy session. Those interactions will immediately be logged and visible in the Interactions page within the app. If the interaction was a voice call and you have call recording setup, then links to the recording will show up in the interactions page.
 
 
 ## Interactions Page
