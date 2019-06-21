@@ -158,8 +158,7 @@ See also the list of [contributors](https://github.com/your/project/contributors
 
 
 ## Musings
-This app intends to consume and interact with the Twilio API's without bias, meaning there isn't any logic meant to manipulate the results of any API calls. The app will follow the rules of the API's as they were meant to be used. The app does not intend to project or posit any business logic; it is purely meant to provide an understanding of the capabilities of our API's (primarily Proxy) and create a visual overlay representing the results of consuming and interacting with those API's. As an example, if you try to do something proxy won't let you do (eg. add a unique participant to 2 open sessions with the same proxy identifier) then the app will respond with an untampered response from the API telling you this isn't allowed.
-
+This app intends to consume and interact with the Twilio API's without bias, meaning there isn't any logic meant to manipulate the results of any API calls. The app will follow the rules of the API's as they were meant to be used. The app does not intend to project or posit any business logic; it is purely meant to provide an understanding of the capabilities of our API's (primarily Proxy) and create a visual overlay representing the results of consuming and interacting with those API's. As an example, if you try to do something proxy won't let you do (eg. add a unique participant to 2 open sessions with the same proxy identifier) then the app will respond by essentially relaying the information returned by the the API to the user, which in this case would be an error message telling the user why this is not possible.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
