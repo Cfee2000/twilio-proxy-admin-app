@@ -131,7 +131,7 @@ If you've implemented Chat, then you can use the "Create Chat Participant" if yo
 
 If 2 Participants exist at any time for a particular Session, the UI will enable a "Dial" button that can be used for click-to-call from one participant to the other. The dialing participant will always be the participant you clicked the "Dial" button for, and the receiving participant will always be the adjacent participant. Pressing "Place Call" from the modal window will place the call. This will toggle the "Hangup Call" button to force terminate the call from the browser if desired. 
 
-Inbound calling is also possible if you've completed the setup for it. To get an inbound call started, you can click the "Dial" button, and then from the PSTN (eg. cell phone of one participant) you can place an inbound call to the other participant (as long as you've followed the steps above on inbound call setup). In this case, the "Place Call" button will toggle to an "Answer Call?" button that will allow you to take the call from the browser.
+Inbound calling is also possible if you've completed the setup for it. To get an inbound call started, you can click the "Dial" button, and then from the PSTN (eg. cell phone of one participant) you can place an inbound call to the other participant (as long as you've followed the steps above on inbound call setup). At this point, you can initiate the call from the PSTN (eg. cell phone of participant), after which in the browser the "Place Call" button will toggle to an "Answer Call?" button that will allow you to take the call from the browser.
 
 There is also a "Send SMS" button that will show up for each participant, and will allow you to send SMS from one participant outbound to the other participant on their cell phone.
 
