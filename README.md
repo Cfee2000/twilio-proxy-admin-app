@@ -158,7 +158,7 @@ See also the list of [contributors](https://github.com/your/project/contributors
 
 
 ## Musings
-
+This app intends to consume and interact with the Twilio API's without bias, meaning there isn't any logic meant to manipulate the results of any API calls. This means that the app should follow the rules of the API's as they were meant to be used. So, for example, if you try to do something proxy won't let you do (eg. add a unique participant to 2 open sessions with the same proxy identifier) then the app will respond with an untampered response from the API telling you this isn't allowed.
 
 ## License
 
