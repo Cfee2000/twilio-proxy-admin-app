@@ -196,6 +196,8 @@
 
 <script>
     let device = "";
+    let chatClient = "";
+    let chatChannel = "";
     $(document).ready(function(data){
 
         $('#identifier, #proxyIdentifier').inputmask({
@@ -269,7 +271,7 @@
                         $('#hangupCall').hide();
                         $('#answerCall').show(); --}}
                     });
-                    
+
                     device.on('connect', function (conn) {
                         //connection = conn;
                         sessionStorage.setItem('callSid', conn.parameters.CallSid);
@@ -399,16 +401,18 @@
     });
 
    $('#modalChat').on('show.bs.modal', function(event) {
-        let token = sessionStorage.getItem('ClientAccessToken');
-        let chatChannelSID = event.relatedTarget.attributes.getNamedItem("data-participantPhone").value;
-        
-        if(sessionStorage.getItem('ChatConfig') == "false"){
-            $('#modal-errorChat').show();
-            $('#errorMsgChat').text("This app is not configured for chat. See Readme: https://github.com/Cfee2000/twilio-proxy-admin-app"); 
-        }else{
-            initializeChat(token, chatChannelSID);
-        }
-        
+       if(!chatClient)
+       {
+            let token = sessionStorage.getItem('ClientAccessToken');
+            let chatChannelSID = event.relatedTarget.attributes.getNamedItem("data-participantPhone").value;
+            
+            if(sessionStorage.getItem('ChatConfig') == "false"){
+                $('#modal-errorChat').show();
+                $('#errorMsgChat').text("This app is not configured for chat. See Readme: https://github.com/Cfee2000/twilio-proxy-admin-app"); 
+            }else{
+                initializeChat(token, chatChannelSID);
+            }
+       } 
    });
 
     $('#modalChat').on('hide.bs.modal', function(e) {
@@ -419,29 +423,35 @@
     });
 
     async function initializeChat(token, chatChannelSID){
-            // Initialize the Chat client
-            
-            let client = await Twilio.Chat.Client.create(token);
-            await client.getSubscribedChannels();
-            let channel = await client.getChannelBySid(chatChannelSID);
-            let joinedChannel;
-            if(channel.state.status != "joined")
+            // Initialize the Chat client if not already initialized
+            if(chatClient)
             {
-                joinedChannel = await channel.join();
+                //Assume both the client and associated channel (ie. chatChannel) is already instantiated
+                chatClient.updateToken(token);
             }
             else{
-                joinedChannel = channel;
+                //Assume both the client and associated channel need to be instantiated
+                chatClient = await Twilio.Chat.Client.create(token);
+                chatChannel = await chatClient.getChannelBySid(chatChannelSID);
+
+                if(chatChannel.state.status != "joined")
+                {
+                    await chatChannel.join();
+                }
             }
 
-            joinedChannel.on('messageAdded', function(message) {
-                console.log(message);
-                printMessage(message.author, message.body);
-            });
+            if(chatChannel._events.messageAdded.length < 2)
+            {
+                chatChannel.on('messageAdded', function(message) {
+                    console.log(message);
+                    printMessage(message.author, message.body);
+                });
+            }
 
             $('#chat-input').on('keydown', (e) => {
                 let input = $('#chat-input');
                 if(e.keyCode == 13) {
-                    joinedChannel.sendMessage(input.val());
+                    chatChannel.sendMessage(input.val());
                     input.val('');
                 }
             });
@@ -508,7 +518,7 @@
             device.disconnectAll();
         }
         {{!-- let outboundToClient = "";
-        if(connection._status == "open")
+        if(device.activeConnection()._status == "open")
         {
             //Hangup Button was pressed AFTER phone call was answered
             if(device.activeConnection().parameters.To)
